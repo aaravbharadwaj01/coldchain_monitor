@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdChain Monitor — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">❄️</div>
+    <div class="logo-text">ColdChain<span>MONITOR</span></div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item active"><a class="nav-link" href="dashboard.html"><span class="left"><span class="icon">▦</span>Dashboard</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../vehicles/vehicles.html"><span class="left"><span class="icon">🚚</span>Vehicles</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../alerts/alerts.html"><span class="left"><span class="icon">🔔</span>Alerts</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../analytics/analytics.html"><span class="left"><span class="icon">📊</span>Analytics</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../reports/reports.html"><span class="left"><span class="icon">📄</span>Reports</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../drivers/drivers.html"><span class="left"><span class="icon">👤</span>Drivers</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../maintenance/maintenance.html"><span class="left"><span class="icon">🛠</span>Maintenance</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../settings/settings.html"><span class="left"><span class="icon">⚙️</span>Settings</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../profile/profile.html"><span class="left"><span class="icon">◎</span>Profile</span></a></li>
+
+    <div class="nav-footer">
+      <li class="nav-item"><a class="nav-link" href="#" id="logoutLink"><span class="left"><span class="icon">⎋</span>Logout</span></a></li>
+    </div>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1>Dashboard</h1>
+    <div class="top-right">
+      <div class="bell-wrap" id="bellToggle">
+        <div class="bell">🔔<span class="dot" id="bellDot"></span></div>
+        <div class="bell-dropdown" id="bellDropdown">
+          <div class="bell-dropdown-header">Recent Alerts</div>
+          <div class="bell-list" id="bellList"></div>
+          <a href="../alerts/alerts.html" class="bell-view-all">View all alerts</a>
+        </div>
+      </div>
+      <div class="profile" id="profileToggle">
+        <div class="avatar">A</div>
+        <span class="name">Admin</span>
+        <span class="chev">▾</span>
+        <div class="profile-dropdown" id="profileDropdown">
+          <a href="../profile/profile.html" class="dropdown-item">👤 My Profile</a>
+          <a href="../settings/settings.html" class="dropdown-item">⚙️ Settings</a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item logout-item">⎋ Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="stat-card c-total">
+        <div class="stat-top">
+          <div><div class="stat-label">Total Vehicles</div></div>
+          <div class="stat-icon">🚛</div>
+        </div>
+      <div class="stat-value" id="totalVehicles">0</div>
+       <div class="stat-sub">All Vehicles</div>
+</div>
+
+      <div class="stat-card c-online">
+        <div class="stat-top">
+          <div><div class="stat-label">Online Vehicles</div></div>
+          <div class="stat-icon">📡</div>
+        </div>
+        <div class="stat-value" id="onlineVehicles">0</div>
+        <div class="stat-sub">100% Online</div>
+      </div>
+
+      <div class="stat-card c-alerts">
+        <div class="stat-top">
+          <div><div class="stat-label">Active Alerts</div></div>
+          <div class="stat-icon">⚠️</div>
+        </div>
+        <div class="stat-value" id="activeAlerts">0</div>
+        <div class="stat-sub">View Alerts</div>
+      </div>
+
+      <div class="stat-card c-temp">
+        <div class="stat-top">
+          <div><div class="stat-label">Avg. Temperature</div></div>
+          <div class="stat-icon">🌡️</div>
+        </div>
+        <div class="stat-value" id="avgTemperature">-- °C</div>
+        <div class="stat-sub">Inside Vehicles</div>
+      </div>
+
+      <div class="stat-card c-humidity">
+        <div class="stat-top">
+          <div><div class="stat-label">Avg. Humidity</div></div>
+          <div class="stat-icon">💧</div>
+        </div>
+       <div class="stat-value" id="avgHumidity">-- %</div>
+        <div class="stat-sub">Inside Vehicles</div>
+      </div>
+
+      <div class="stat-card c-timeout">
+        <div class="stat-top">
+          <div><div class="stat-label">Sensor Timeouts</div></div>
+          <div class="stat-icon">⏱️</div>
+        </div>
+        <div class="stat-value" id="sensorTimeouts">0</div>
+        <div class="stat-sub">Since Last Reset</div>
+      </div>
+    </div>
+
+    <!-- 🔌 Live threshold-breach banner — shown/hidden by loadDashboardData() -->
+    <div id="thresholdAlertBanner" class="threshold-alert-banner" style="display:none;"></div>
+    <!--
+      🔌 INTEGRATION POINT: the 5 numbers above should come from
+      GET /api/analytics/summary (see backend/api/server.js), which runs
+      SQL aggregate queries (COUNT, AVG) over `vehicles` + `sensor_readings`.
+    -->
+
+    <!-- SEARCH -->
+    <div class="search-card">
+      <h3>Search Vehicle / City</h3>
+      <div class="search-input">
+        🔍 <input type="text" id="dashboardSearchInput" placeholder="Search by vehicle number or city...">
+      </div>
+      <select class="status-select" id="dashboardStatusFilter">
+        <option>All Status</option>
+        <option>Healthy</option>
+        <option>Warning</option>
+        <option>Critical</option>
+      </select>
+      <button class="btn-primary" id="dashboardSearchBtn" type="button">Search</button>
+    </div>
+
+    <!-- VEHICLES + ALERTS -->
+    <div class="grid-main">
+      <div class="panel">
+        <div class="panel-header"><h3>Your Vehicles</h3></div>
+        <div class="vehicles-grid" id="dashboardVehiclesGrid">
+
+          <div class="vehicle-card" data-plate="RJ14 AB 4587" data-city="Jaipur Route" data-status="Healthy">
+            <span class="badge online">Online</span>
+            <img class="vehicle-img" src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=500&auto=format&fit=crop&q=60" alt="Truck RJ14 AB 4587">
+            <div class="vehicle-body">
+              <div class="vehicle-plate">RJ14 AB 4587</div>
+              <div class="vehicle-route">Jaipur Route</div>
+              <div class="vehicle-metrics">
+                <div class="metric temp"><span class="val">22.1°c</span><span class="lbl">Temperature</span></div>
+                <div class="metric"><span class="val">54%</span><span class="lbl">Humidity</span></div>
+                <span class="status-pill healthy">Healthy</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="vehicle-card" data-plate="DL1L AB 1234" data-city="Delhi Route" data-status="Warning">
+            <span class="badge warning">Warning</span>
+            <img class="vehicle-img" src="https://images.unsplash.com/photo-1592805723216-27b7dcc65fbd?w=500&auto=format&fit=crop&q=60" alt="Truck DL1L AB 1234">
+            <div class="vehicle-body">
+              <div class="vehicle-plate">DL1L AB 1234</div>
+              <div class="vehicle-route">Delhi Route</div>
+              <div class="vehicle-metrics">
+                <div class="metric temp2"><span class="val">26.8°c</span><span class="lbl">Temperature</span></div>
+                <div class="metric"><span class="val">60%</span><span class="lbl">Humidity</span></div>
+                <span class="status-pill warning">Warning</span>
+              </div>
+            </div>
+          </div>
+          <!-- 🔌 INTEGRATION POINT: render one .vehicle-card per row returned by getVehicles() in assets/js/mockData.js -->
+
+        </div>
+        <div class="no-results" id="dashboardNoResults" style="display:none;">No vehicles match your search.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Recent Alerts</h3><a class="view-all" href="../alerts/alerts.html">View All</a></div>
+
+        <div class="alert-item">
+          <div class="alert-icon critical">⚠️</div>
+          <div class="alert-text">
+            <div class="alert-title">RJ14 AB 4587</div>
+            <div class="alert-desc">Temperature High: 31.2°C</div>
+          </div>
+          <div class="alert-time">10:24 AM</div>
+        </div>
+
+        <div class="alert-item">
+          <div class="alert-icon warning">▲</div>
+          <div class="alert-text">
+            <div class="alert-title">DL1L AB 1234</div>
+            <div class="alert-desc">Humidity High: 72%</div>
+          </div>
+          <div class="alert-time">09:56 AM</div>
+        </div>
+
+        <div class="alert-item">
+          <div class="alert-icon warning">▲</div>
+          <div class="alert-text">
+            <div class="alert-title">RJ14 AB 4587</div>
+            <div class="alert-desc">Temperature Low: 2.1°C</div>
+          </div>
+          <div class="alert-time">08:40 AM</div>
+        </div>
+        <!-- 🔌 INTEGRATION POINT: render top 3 most recent rows from getAlerts() in assets/js/mockData.js -->
+      </div>
+    </div>
+
+    <!-- CHART + DONUT -->
+    <div class="grid-bottom">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Live Overview</h3>
+          <select class="chart-select">
+            <option>Last 1 Hour</option>
+            <option>Last 6 Hours</option>
+            <option>Last 24 Hours</option>
+          </select>
+        </div>
+        <div class="legend">
+          <span><span class="dot temp-dot"></span>Temperature (°C)</span>
+          <span><span class="dot hum-dot"></span>Humidity (%)</span>
+        </div>
+        <canvas id="liveChart" height="200"></canvas>
+        <!-- 🔌 INTEGRATION POINT: see assets/js/live-chart.js for where the ESP32/SQL reading feed plugs in -->
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Vehicle Status</h3></div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 120 120" width="150" height="150">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" stroke-width="16"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#16a34a" stroke-width="16"
+                stroke-dasharray="157 314" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#f5a524" stroke-width="16"
+                stroke-dasharray="157 314" stroke-dashoffset="-157" transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="donut-center">
+              <div class="num">2</div>
+              <div class="lbl">Total</div>
+            </div>
+          </div>
+          <div class="status-legend">
+            <div class="status-row"><span class="left"><span class="sdot healthy"></span>Healthy</span><span>1</span></div>
+            <div class="status-row"><span class="left"><span class="sdot warning"></span>Warning</span><span>0</span></div>
+            <div class="status-row"><span class="left"><span class="sdot critical"></span>Critical</span><span>0</span></div>
+            <div class="status-row"><span class="left"><span class="sdot offline"></span>Offline</span><span>1</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="../assets/js/mockData.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+<script src="../assets/js/live-chart.js"></script>
+</body>
+</html>

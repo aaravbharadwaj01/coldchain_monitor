@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdChain Monitor — Maintenance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">❄️</div>
+    <div class="logo-text">ColdChain<span>MONITOR</span></div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" href="../dashboard/dashboard.html"><span class="left"><span class="icon">▦</span>Dashboard</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../vehicles/vehicles.html"><span class="left"><span class="icon">🚚</span>Vehicles</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../alerts/alerts.html"><span class="left"><span class="icon">🔔</span>Alerts</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../analytics/analytics.html"><span class="left"><span class="icon">📊</span>Analytics</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../reports/reports.html"><span class="left"><span class="icon">📄</span>Reports</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../drivers/drivers.html"><span class="left"><span class="icon">👤</span>Drivers</span></a></li>
+    <li class="nav-item active"><a class="nav-link" href="maintenance.html"><span class="left"><span class="icon">🛠</span>Maintenance</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../settings/settings.html"><span class="left"><span class="icon">⚙️</span>Settings</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../profile/profile.html"><span class="left"><span class="icon">◎</span>Profile</span></a></li>
+
+    <div class="nav-footer">
+      <li class="nav-item"><a class="nav-link" href="#" id="logoutLink"><span class="left"><span class="icon">⎋</span>Logout</span></a></li>
+    </div>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1>Maintenance</h1>
+    <div class="top-right">
+      <div class="bell-wrap" id="bellToggle">
+        <div class="bell">🔔<span class="dot" id="bellDot"></span></div>
+        <div class="bell-dropdown" id="bellDropdown">
+          <div class="bell-dropdown-header">Recent Alerts</div>
+          <div class="bell-list" id="bellList"></div>
+          <a href="../alerts/alerts.html" class="bell-view-all">View all alerts</a>
+        </div>
+      </div>
+      <div class="profile" id="profileToggle">
+        <div class="avatar">A</div>
+        <span class="name">Admin</span>
+        <span class="chev">▾</span>
+        <div class="profile-dropdown" id="profileDropdown">
+          <a href="../profile/profile.html" class="dropdown-item">👤 My Profile</a>
+          <a href="../settings/settings.html" class="dropdown-item">⚙️ Settings</a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item logout-item">⎋ Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="page-header">
+      <div></div>
+      <button class="btn-primary" id="scheduleMaintenanceBtn" data-modal-open="scheduleMaintenanceModal">＋ Schedule Maintenance</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Task</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="maintenanceTableBody">
+          <tr>
+            <td class="cell-strong">RJ14 AB 4587</td>
+            <td>Sensor Calibration</td>
+            <td class="cell-muted">20 May 2025</td>
+            <td><span class="pill healthy">Upcoming</span></td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn" title="Edit">✎</button>
+                <button class="icon-btn danger" title="Delete">🗑</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="cell-strong">DL1L AB 1234</td>
+            <td>Refrigeration Unit Service</td>
+            <td class="cell-muted">18 May 2025</td>
+            <td><span class="pill warning">Due Soon</span></td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn" title="Edit">✎</button>
+                <button class="icon-btn danger" title="Delete">🗑</button>
+              </div>
+            </td>
+          </tr>
+          <!-- 🔌 INTEGRATION POINT: render one row per record from
+               getMaintenanceLogs() in assets/js/mockData.js (GET
+               /api/maintenance, reads SQL `maintenance_logs` table) -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- SCHEDULE MAINTENANCE MODAL -->
+<div class="modal-overlay" id="scheduleMaintenanceModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Schedule Maintenance</h2>
+      <button class="modal-close" data-modal-close="scheduleMaintenanceModal">✕</button>
+    </div>
+    <form id="scheduleMaintenanceForm">
+      <div class="modal-body">
+        <div class="field">
+          <label for="maintenanceVehicleInput">Vehicle</label>
+          <input type="text" id="maintenanceVehicleInput" placeholder="e.g. RJ14 AB 4587" required>
+        </div>
+        <div class="field">
+          <label for="maintenanceTaskInput">Task</label>
+          <input type="text" id="maintenanceTaskInput" placeholder="e.g. Sensor Calibration" required>
+        </div>
+        <div class="field">
+          <label for="maintenanceDueDateInput">Due Date</label>
+          <input type="date" id="maintenanceDueDateInput" required>
+        </div>
+        <div class="field">
+          <label for="maintenanceStatusInput">Status</label>
+          <select id="maintenanceStatusInput">
+            <option>Upcoming</option>
+            <option>Due Soon</option>
+            <option>Overdue</option>
+            <option>Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" data-modal-close="scheduleMaintenanceModal">Cancel</button>
+        <button type="submit" class="btn-primary">Schedule</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../assets/js/mockData.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

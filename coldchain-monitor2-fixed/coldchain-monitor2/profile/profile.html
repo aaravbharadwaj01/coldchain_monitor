@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdChain Monitor — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">❄️</div>
+    <div class="logo-text">ColdChain<span>MONITOR</span></div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" href="../dashboard/dashboard.html"><span class="left"><span class="icon">▦</span>Dashboard</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../vehicles/vehicles.html"><span class="left"><span class="icon">🚚</span>Vehicles</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../alerts/alerts.html"><span class="left"><span class="icon">🔔</span>Alerts</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../analytics/analytics.html"><span class="left"><span class="icon">📊</span>Analytics</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../reports/reports.html"><span class="left"><span class="icon">📄</span>Reports</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../drivers/drivers.html"><span class="left"><span class="icon">👤</span>Drivers</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../maintenance/maintenance.html"><span class="left"><span class="icon">🛠</span>Maintenance</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../settings/settings.html"><span class="left"><span class="icon">⚙️</span>Settings</span></a></li>
+    <li class="nav-item active"><a class="nav-link" href="profile.html"><span class="left"><span class="icon">◎</span>Profile</span></a></li>
+
+    <div class="nav-footer">
+      <li class="nav-item"><a class="nav-link" href="#" id="logoutLink"><span class="left"><span class="icon">⎋</span>Logout</span></a></li>
+    </div>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1>Profile</h1>
+    <div class="top-right">
+      <div class="bell-wrap" id="bellToggle">
+        <div class="bell">🔔<span class="dot" id="bellDot"></span></div>
+        <div class="bell-dropdown" id="bellDropdown">
+          <div class="bell-dropdown-header">Recent Alerts</div>
+          <div class="bell-list" id="bellList"></div>
+          <a href="../alerts/alerts.html" class="bell-view-all">View all alerts</a>
+        </div>
+      </div>
+      <div class="profile" id="profileToggle">
+        <div class="avatar">A</div>
+        <span class="name">Admin</span>
+        <span class="chev">▾</span>
+        <div class="profile-dropdown" id="profileDropdown">
+          <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+          <a href="../settings/settings.html" class="dropdown-item">⚙️ Settings</a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item logout-item">⎋ Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="panel">
+      <div class="tabs" data-group="profile">
+        <button class="tab active" data-tab="tab-profile-info">Profile Info</button>
+        <button class="tab" data-tab="tab-change-password">Change Password</button>
+      </div>
+
+      <!-- PROFILE INFO -->
+      <div class="tab-panel active" id="tab-profile-info" data-group="profile">
+        <div class="profile-photo-row">
+          <img class="profile-avatar-lg" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=240&auto=format&fit=crop&q=60" alt="Admin avatar">
+          <button class="btn-secondary" id="changePhotoBtn">Change Photo</button>
+          <!-- 🔌 INTEGRATION POINT: POST /api/profile/photo (multipart upload)
+               -> stores image + updates `photo_url` column on SQL `users` table -->
+        </div>
+
+        <form id="profileInfoForm">
+          <div class="form-grid">
+            <div class="field">
+              <label>Name</label>
+              <input type="text" value="Admin User">
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" value="admin@coldchainmonitor.com">
+            </div>
+            <div class="field">
+              <label>Phone</label>
+              <input type="text" value="+91 98765 43210">
+            </div>
+            <div class="field">
+              <label>Role</label>
+              <select disabled>
+                <option>Administrator</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top:26px;">Save Changes</button>
+        </form>
+        <!-- 🔌 INTEGRATION POINT: on submit, PUT /api/profile -> UPDATE SQL
+             `users` table row for the currently logged-in user (matched via
+             session/JWT from backend/api/server.js -> POST /api/auth/login) -->
+      </div>
+
+      <!-- CHANGE PASSWORD -->
+      <div class="tab-panel" id="tab-change-password" data-group="profile">
+        <form id="changePasswordForm">
+          <div class="form-grid">
+            <div class="field">
+              <label>Current Password</label>
+              <input type="password" placeholder="Enter current password">
+            </div>
+            <div class="field"></div>
+            <div class="field">
+              <label>New Password</label>
+              <input type="password" placeholder="Enter new password">
+            </div>
+            <div class="field">
+              <label>Confirm New Password</label>
+              <input type="password" placeholder="Re-enter new password">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top:26px;">Update Password</button>
+        </form>
+        <!-- 🔌 INTEGRATION POINT: on submit, POST /api/profile/change-password
+             -> backend verifies current password against the bcrypt hash
+             stored in SQL `users`.password_hash, then UPDATEs it with the
+             new bcrypt hash. -->
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="../assets/js/mockData.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

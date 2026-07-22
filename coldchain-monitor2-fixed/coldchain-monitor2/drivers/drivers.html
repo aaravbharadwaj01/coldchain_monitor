@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdChain Monitor — Drivers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">❄️</div>
+    <div class="logo-text">ColdChain<span>MONITOR</span></div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" href="../dashboard/dashboard.html"><span class="left"><span class="icon">▦</span>Dashboard</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../vehicles/vehicles.html"><span class="left"><span class="icon">🚚</span>Vehicles</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../alerts/alerts.html"><span class="left"><span class="icon">🔔</span>Alerts</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../analytics/analytics.html"><span class="left"><span class="icon">📊</span>Analytics</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../reports/reports.html"><span class="left"><span class="icon">📄</span>Reports</span></a></li>
+    <li class="nav-item active"><a class="nav-link" href="drivers.html"><span class="left"><span class="icon">👤</span>Drivers</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../maintenance/maintenance.html"><span class="left"><span class="icon">🛠</span>Maintenance</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../settings/settings.html"><span class="left"><span class="icon">⚙️</span>Settings</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../profile/profile.html"><span class="left"><span class="icon">◎</span>Profile</span></a></li>
+
+    <div class="nav-footer">
+      <li class="nav-item"><a class="nav-link" href="#" id="logoutLink"><span class="left"><span class="icon">⎋</span>Logout</span></a></li>
+    </div>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1>Drivers</h1>
+    <div class="top-right">
+      <div class="bell-wrap" id="bellToggle">
+        <div class="bell">🔔<span class="dot" id="bellDot"></span></div>
+        <div class="bell-dropdown" id="bellDropdown">
+          <div class="bell-dropdown-header">Recent Alerts</div>
+          <div class="bell-list" id="bellList"></div>
+          <a href="../alerts/alerts.html" class="bell-view-all">View all alerts</a>
+        </div>
+      </div>
+      <div class="profile" id="profileToggle">
+        <div class="avatar">A</div>
+        <span class="name">Admin</span>
+        <span class="chev">▾</span>
+        <div class="profile-dropdown" id="profileDropdown">
+          <a href="../profile/profile.html" class="dropdown-item">👤 My Profile</a>
+          <a href="../settings/settings.html" class="dropdown-item">⚙️ Settings</a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item logout-item">⎋ Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="page-header">
+      <div></div>
+      <button class="btn-primary" id="addDriverBtn" data-modal-open="addDriverModal">＋ Add Driver</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Assigned Vehicle</th>
+            <th>License No.</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="driversTableBody">
+          <tr>
+            <td class="cell-strong">Mohan Singh</td>
+            <td class="cell-muted">+91 98765 43210</td>
+            <td>RJ14 AB 4587</td>
+            <td class="cell-muted">RJ-0420190001234</td>
+            <td><span class="pill healthy">On Duty</span></td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn" title="Edit">✎</button>
+                <button class="icon-btn danger" title="Delete">🗑</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="cell-strong">Rakesh Kumar</td>
+            <td class="cell-muted">+91 91234 56780</td>
+            <td>DL1L AB 1234</td>
+            <td class="cell-muted">DL-0320180005678</td>
+            <td><span class="pill healthy">On Duty</span></td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn" title="Edit">✎</button>
+                <button class="icon-btn danger" title="Delete">🗑</button>
+              </div>
+            </td>
+          </tr>
+          <!-- 🔌 INTEGRATION POINT: render one row per driver from
+               getDrivers() in assets/js/mockData.js (GET /api/drivers,
+               reads SQL `drivers` table, FK assigned_vehicle_id -> vehicles.id) -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD DRIVER MODAL -->
+<div class="modal-overlay" id="addDriverModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add Driver</h2>
+      <button class="modal-close" data-modal-close="addDriverModal">✕</button>
+    </div>
+    <form id="addDriverForm">
+      <div class="modal-body">
+        <div class="field">
+          <label for="driverNameInput">Name</label>
+          <input type="text" id="driverNameInput" placeholder="e.g. Mohan Singh" required>
+        </div>
+        <div class="field">
+          <label for="driverPhoneInput">Phone</label>
+          <input type="text" id="driverPhoneInput" placeholder="e.g. +91 98765 43210">
+        </div>
+        <div class="field">
+          <label for="driverVehicleInput">Assigned Vehicle</label>
+          <input type="text" id="driverVehicleInput" placeholder="e.g. RJ14 AB 4587">
+        </div>
+        <div class="field">
+          <label for="driverLicenseInput">License No.</label>
+          <input type="text" id="driverLicenseInput" placeholder="e.g. RJ-0420190001234">
+        </div>
+        <div class="field">
+          <label for="driverStatusInput">Status</label>
+          <select id="driverStatusInput">
+            <option>On Duty</option>
+            <option>Off Duty</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" data-modal-close="addDriverModal">Cancel</button>
+        <button type="submit" class="btn-primary">Add Driver</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../assets/js/mockData.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

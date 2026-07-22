@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdChain Monitor — Alerts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">❄️</div>
+    <div class="logo-text">ColdChain<span>MONITOR</span></div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" href="../dashboard/dashboard.html"><span class="left"><span class="icon">▦</span>Dashboard</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../vehicles/vehicles.html"><span class="left"><span class="icon">🚚</span>Vehicles</span></a></li>
+    <li class="nav-item active"><a class="nav-link" href="alerts.html"><span class="left"><span class="icon">🔔</span>Alerts</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../analytics/analytics.html"><span class="left"><span class="icon">📊</span>Analytics</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../reports/reports.html"><span class="left"><span class="icon">📄</span>Reports</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../drivers/drivers.html"><span class="left"><span class="icon">👤</span>Drivers</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../maintenance/maintenance.html"><span class="left"><span class="icon">🛠</span>Maintenance</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../settings/settings.html"><span class="left"><span class="icon">⚙️</span>Settings</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../profile/profile.html"><span class="left"><span class="icon">◎</span>Profile</span></a></li>
+
+    <div class="nav-footer">
+      <li class="nav-item"><a class="nav-link" href="#" id="logoutLink"><span class="left"><span class="icon">⎋</span>Logout</span></a></li>
+    </div>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1>Alerts</h1>
+    <div class="top-right">
+      <div class="bell-wrap" id="bellToggle">
+        <div class="bell">🔔<span class="dot" id="bellDot"></span></div>
+        <div class="bell-dropdown" id="bellDropdown">
+          <div class="bell-dropdown-header">Recent Alerts</div>
+          <div class="bell-list" id="bellList"></div>
+          <a href="alerts.html" class="bell-view-all">View all alerts</a>
+        </div>
+      </div>
+      <div class="profile" id="profileToggle">
+        <div class="avatar">A</div>
+        <span class="name">Admin</span>
+        <span class="chev">▾</span>
+        <div class="profile-dropdown" id="profileDropdown">
+          <a href="../profile/profile.html" class="dropdown-item">👤 My Profile</a>
+          <a href="../settings/settings.html" class="dropdown-item">⚙️ Settings</a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item logout-item">⎋ Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="filter-bar">
+      <select class="filter-select" id="alertVehicleFilter">
+        <option>All Vehicles</option>
+        <option>RJ14 AB 4587</option>
+        <option>DL1L AB 1234</option>
+      </select>
+      <select class="filter-select" id="alertTypeFilter">
+        <option>All Types</option>
+        <option>Temperature High</option>
+        <option>Temperature Low</option>
+        <option>Humidity High</option>
+        <option>Sensor Offline</option>
+        <option>Door Open</option>
+      </select>
+      <select class="filter-select" id="alertStatusFilter">
+        <option>All Status</option>
+        <option>Active</option>
+        <option>Resolved</option>
+      </select>
+      <input type="date" class="filter-select" id="alertDateFilter" value="2025-05-16">
+      <select class="filter-select" style="min-width:110px;" id="alertExportSelect">
+        <option>Export</option>
+        <option>Export CSV</option>
+        <option>Export PDF</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Vehicle</th>
+            <th>Alert Type</th>
+            <th>Message</th>
+            <th>Severity</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="alertsTableBody">
+          <tr>
+            <td class="cell-muted">10:24 AM</td>
+            <td class="cell-strong">RJ14 AB 4587</td>
+            <td>Temperature High</td>
+            <td class="cell-muted">Temperature reached 31.2°C</td>
+            <td><span class="pill high">High</span></td>
+            <td><span class="pill active">Active</span></td>
+          </tr>
+          <tr>
+            <td class="cell-muted">09:56 AM</td>
+            <td class="cell-strong">DL1L AB 1234</td>
+            <td>Humidity High</td>
+            <td class="cell-muted">Humidity reached 72%</td>
+            <td><span class="pill medium">Medium</span></td>
+            <td><span class="pill active">Active</span></td>
+          </tr>
+          <tr>
+            <td class="cell-muted">08:40 AM</td>
+            <td class="cell-strong">RJ14 AB 4587</td>
+            <td>Temperature Low</td>
+            <td class="cell-muted">Temperature dropped to 2.1°C</td>
+            <td><span class="pill high">High</span></td>
+            <td><span class="pill resolved">Resolved</span></td>
+          </tr>
+          <tr>
+            <td class="cell-muted">07:15 AM</td>
+            <td class="cell-strong">DL1L AB 1234</td>
+            <td>Sensor Offline</td>
+            <td class="cell-muted">Sensor not responding</td>
+            <td><span class="pill high">High</span></td>
+            <td><span class="pill resolved">Resolved</span></td>
+          </tr>
+          <tr>
+            <td class="cell-muted">06:30 AM</td>
+            <td class="cell-strong">RJ14 AB 4587</td>
+            <td>Door Open</td>
+            <td class="cell-muted">Door was opened for 2 min</td>
+            <td><span class="pill low">Low</span></td>
+            <td><span class="pill resolved">Resolved</span></td>
+          </tr>
+          <!-- 🔌 INTEGRATION POINT: replace the static <tr> rows above by
+               rendering one row per alert returned from getAlerts() in
+               assets/js/mockData.js (GET /api/alerts, reads SQL `alerts`
+               table). Alerts should be INSERTed server-side the instant a
+               reading POSTed by the ESP32 crosses a threshold defined in
+               Settings > Thresholds. -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script src="../assets/js/mockData.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdChain Monitor — Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">❄️</div>
+    <div class="logo-text">ColdChain<span>MONITOR</span></div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" href="../dashboard/dashboard.html"><span class="left"><span class="icon">▦</span>Dashboard</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../vehicles/vehicles.html"><span class="left"><span class="icon">🚚</span>Vehicles</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../alerts/alerts.html"><span class="left"><span class="icon">🔔</span>Alerts</span></a></li>
+    <li class="nav-item active"><a class="nav-link" href="analytics.html"><span class="left"><span class="icon">📊</span>Analytics</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../reports/reports.html"><span class="left"><span class="icon">📄</span>Reports</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../drivers/drivers.html"><span class="left"><span class="icon">👤</span>Drivers</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../maintenance/maintenance.html"><span class="left"><span class="icon">🛠</span>Maintenance</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../settings/settings.html"><span class="left"><span class="icon">⚙️</span>Settings</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../profile/profile.html"><span class="left"><span class="icon">◎</span>Profile</span></a></li>
+
+    <div class="nav-footer">
+      <li class="nav-item"><a class="nav-link" href="#" id="logoutLink"><span class="left"><span class="icon">⎋</span>Logout</span></a></li>
+    </div>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1>Analytics</h1>
+    <div class="top-right">
+      <input type="date" class="filter-select" value="2025-05-16" style="min-width:170px;">
+      <select class="filter-select" style="min-width:100px;">
+        <option>Export</option>
+        <option>Export CSV</option>
+        <option>Export PDF</option>
+      </select>
+      <div class="bell-wrap" id="bellToggle">
+        <div class="bell">🔔<span class="dot" id="bellDot"></span></div>
+        <div class="bell-dropdown" id="bellDropdown">
+          <div class="bell-dropdown-header">Recent Alerts</div>
+          <div class="bell-list" id="bellList"></div>
+          <a href="../alerts/alerts.html" class="bell-view-all">View all alerts</a>
+        </div>
+      </div>
+      <div class="profile" id="profileToggle">
+        <div class="avatar">A</div>
+        <span class="name">Admin</span>
+        <span class="chev">▾</span>
+        <div class="profile-dropdown" id="profileDropdown">
+          <a href="../profile/profile.html" class="dropdown-item">👤 My Profile</a>
+          <a href="../settings/settings.html" class="dropdown-item">⚙️ Settings</a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item logout-item">⎋ Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- SUMMARY CARDS -->
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card c-temp">
+        <div class="stat-top"><div class="stat-label">Avg. Temp (All Vehicles)</div></div>
+        <div class="stat-value" id="avgTemp">-- °C</div>
+        <div class="stat-sub">↓ 1.2°C from last week</div>
+      </div>
+      <div class="stat-card c-humidity">
+        <div class="stat-top"><div class="stat-label">Avg. Humidity (All Vehicles)</div></div>
+        <div class="stat-value" id="avgHumidity">-- %</div>
+        <div class="stat-sub" style="color:var(--green);">↓ 2% from last week</div>
+      </div>
+      <div class="stat-card c-alerts">
+        <div class="stat-top"><div class="stat-label">Total Alerts</div></div>
+        <div class="stat-value" id="totalAlerts">0</div>
+        <div class="stat-sub">↓ 6 from last week</div>
+      </div>
+      <div class="stat-card c-online">
+        <div class="stat-top"><div class="stat-label">Uptime</div></div>
+        <div class="stat-value" id="uptime">-- %</div>
+        <div class="stat-sub">↑ 1.3% from last week</div>
+      </div>
+      <!-- 🔌 INTEGRATION POINT: populate these 4 cards from getAnalyticsSummary()
+           in assets/js/mockData.js (GET /api/analytics/summary — SQL AVG/COUNT
+           aggregate query across `vehicles` + `sensor_readings` + `alerts`) -->
+    </div>
+
+    <!-- CHARTS -->
+    <div class="grid-bottom" style="grid-template-columns:1fr 1fr 1fr;">
+
+      <div class="panel">
+        <div class="panel-header"><h3>Average Temperature (°C)</h3></div>
+        <div class="bars-chart">
+          <div class="bar-col">
+            <span class="bar-value" id="vehicle1Temp">--</span>
+            <div class="bar" style="height:74%;"></div>
+            <span class="bar-label">RJ14 AB 4587</span>
+          </div>
+          <div class="bar-col">
+           <span class="bar-value" id="vehicle2Temp">--</span>
+            <div class="bar" style="height:82%;"></div>
+            <span class="bar-label">DL1L AB 1234</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Average Humidity (%)</h3></div>
+        <div class="bars-chart">
+          <div class="bar-col">
+           <span class="bar-value" id="vehicle1Humidity">-- %</span>
+            <div class="bar" style="height:66%;background:var(--purple);"></div>
+            <span class="bar-label">RJ14 AB 4587</span>
+          </div>
+          <div class="bar-col">
+            <span class="bar-value" id="vehicle2Humidity">-- %</span>
+            <div class="bar" style="height:74%;background:var(--purple);"></div>
+            <span class="bar-label">DL1L AB 1234</span>
+          </div>
+        </div>
+      </div>
+      <!-- 🔌 INTEGRATION POINT: bar heights above should be computed from
+           AVG(temperature) / AVG(humidity) GROUP BY vehicle_id over the
+           selected date range (SQL query in backend/api/server.js) -->
+
+      <div class="panel">
+        <div class="panel-header"><h3>Vehicle Status</h3></div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 120 120" width="150" height="150">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" stroke-width="16"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#16a34a" stroke-width="16"
+                stroke-dasharray="157 314" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#f5a524" stroke-width="16"
+                stroke-dasharray="157 314" stroke-dashoffset="-157" transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="donut-center">
+              <div class="num">2</div>
+              <div class="lbl">Total</div>
+            </div>
+          </div>
+          <div class="status-legend">
+            <div class="status-row"><span class="left"><span class="sdot healthy"></span>Healthy</span><span>1</span></div>
+            <div class="status-row"><span class="left"><span class="sdot warning"></span>Warning</span><span>1</span></div>
+            <div class="status-row"><span class="left"><span class="sdot critical"></span>Critical</span><span>0</span></div>
+            <div class="status-row"><span class="left"><span class="sdot offline"></span>Offline</span><span>0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="../assets/js/mockData.js"></script>
+
+<script src="../assets/js/analytics.js"></script>
+</body>
+</html>

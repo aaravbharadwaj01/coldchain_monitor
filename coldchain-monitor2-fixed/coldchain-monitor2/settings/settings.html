@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdChain Monitor — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">❄️</div>
+    <div class="logo-text">ColdChain<span>MONITOR</span></div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item"><a class="nav-link" href="../dashboard/dashboard.html"><span class="left"><span class="icon">▦</span>Dashboard</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../vehicles/vehicles.html"><span class="left"><span class="icon">🚚</span>Vehicles</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../alerts/alerts.html"><span class="left"><span class="icon">🔔</span>Alerts</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../analytics/analytics.html"><span class="left"><span class="icon">📊</span>Analytics</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../reports/reports.html"><span class="left"><span class="icon">📄</span>Reports</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../drivers/drivers.html"><span class="left"><span class="icon">👤</span>Drivers</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../maintenance/maintenance.html"><span class="left"><span class="icon">🛠</span>Maintenance</span></a></li>
+    <li class="nav-item active"><a class="nav-link" href="settings.html"><span class="left"><span class="icon">⚙️</span>Settings</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="../profile/profile.html"><span class="left"><span class="icon">◎</span>Profile</span></a></li>
+
+    <div class="nav-footer">
+      <li class="nav-item"><a class="nav-link" href="#" id="logoutLink"><span class="left"><span class="icon">⎋</span>Logout</span></a></li>
+    </div>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1>Settings</h1>
+    <div class="top-right">
+      <div class="bell-wrap" id="bellToggle">
+        <div class="bell">🔔<span class="dot" id="bellDot"></span></div>
+        <div class="bell-dropdown" id="bellDropdown">
+          <div class="bell-dropdown-header">Recent Alerts</div>
+          <div class="bell-list" id="bellList"></div>
+          <a href="../alerts/alerts.html" class="bell-view-all">View all alerts</a>
+        </div>
+      </div>
+      <div class="profile" id="profileToggle">
+        <div class="avatar">A</div>
+        <span class="name">Admin</span>
+        <span class="chev">▾</span>
+        <div class="profile-dropdown" id="profileDropdown">
+          <a href="../profile/profile.html" class="dropdown-item">👤 My Profile</a>
+          <a href="settings.html" class="dropdown-item">⚙️ Settings</a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item logout-item">⎋ Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="panel">
+      <div class="tabs" data-group="settings">
+        <button class="tab active" data-tab="tab-general">General</button>
+        <button class="tab" data-tab="tab-alerts">Alerts</button>
+        <button class="tab" data-tab="tab-emailsms">Email / SMS</button>
+        <button class="tab" data-tab="tab-thresholds">Thresholds</button>
+        <button class="tab" data-tab="tab-system">System</button>
+      </div>
+
+      <!-- GENERAL -->
+      <div class="tab-panel active" id="tab-general" data-group="settings">
+        <form id="generalSettingsForm">
+          <div class="form-grid">
+            <div class="field">
+              <label>Company Name</label>
+              <input type="text" value="Enter vehicle Pvt. Ltd." placeholder="Enter vehicle Pvt. Ltd.">
+            </div>
+            <div class="field">
+              <label>Update Interval (seconds)</label>
+              <input type="number" value="60">
+            </div>
+            <div class="field">
+              <label>Timezone</label>
+              <select>
+                <option>(UTC +05:30) Asia/Kolkata</option>
+                <option>(UTC +00:00) UTC</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Theme</label>
+              <select>
+                <option>Light</option>
+                <option>Dark</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top:26px;">Save Changes</button>
+        </form>
+        <!-- 🔌 INTEGRATION POINT: on submit, PUT /api/settings/general with
+             this form's values -> UPDATE SQL `app_settings` table. The
+             "Update Interval" value here is also what should be sent down
+             to each ESP32 device (e.g. via an MQTT config topic or a
+             GET /api/settings/interval poll on boot) so it knows how often
+             to sample + POST sensor readings. -->
+      </div>
+
+      <!-- ALERTS -->
+      <div class="tab-panel" id="tab-alerts" data-group="settings">
+        <div class="form-grid">
+          <div class="field">
+            <label>Notify on Temperature Threshold Breach</label>
+            <select><option>Enabled</option><option>Disabled</option></select>
+          </div>
+          <div class="field">
+            <label>Notify on Humidity Threshold Breach</label>
+            <select><option>Enabled</option><option>Disabled</option></select>
+          </div>
+          <div class="field">
+            <label>Notify on Sensor Offline</label>
+            <select><option>Enabled</option><option>Disabled</option></select>
+          </div>
+          <div class="field">
+            <label>Notify on Door Open</label>
+            <select><option>Enabled</option><option>Disabled</option></select>
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-top:26px;">Save Changes</button>
+        <!-- 🔌 INTEGRATION POINT: PUT /api/settings/alerts -> UPDATE `app_settings`.
+             Backend alert-evaluation job reads these flags each time a new
+             sensor_readings row is INSERTed by the ESP32, before deciding
+             whether to INSERT a row into `alerts`. -->
+      </div>
+
+      <!-- EMAIL / SMS -->
+      <div class="tab-panel" id="tab-emailsms" data-group="settings">
+        <div class="form-grid">
+          <div class="field">
+            <label>Notification Email</label>
+            <input type="email" placeholder="admin@coldchain.com">
+          </div>
+          <div class="field">
+            <label>Notification Phone (SMS)</label>
+            <input type="text" placeholder="+91 98765 43210">
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-top:26px;">Save Changes</button>
+        <!-- 🔌 INTEGRATION POINT: PUT /api/settings/notifications -> UPDATE
+             `app_settings`. Backend uses these values with an email/SMS
+             provider (SMTP / Twilio) when an `alerts` row is inserted. -->
+      </div>
+
+      <!-- THRESHOLDS -->
+      <div class="tab-panel" id="tab-thresholds" data-group="settings">
+        <form id="thresholdsForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="minTempInput">Min Temperature (°C)</label>
+              <input type="number" step="0.1" id="minTempInput" value="2" required>
+            </div>
+            <div class="field">
+              <label for="maxTempInput">Max Temperature (°C)</label>
+              <input type="number" step="0.1" id="maxTempInput" value="8" required>
+            </div>
+            <div class="field">
+              <label for="maxHumidityInput">Max Humidity (%)</label>
+              <input type="number" step="1" id="maxHumidityInput" value="70" required>
+            </div>
+            <div class="field">
+              <label for="offlineTimeoutInput">Sensor Offline Timeout (minutes)</label>
+              <input type="number" step="1" min="1" id="offlineTimeoutInput" value="10" required>
+            </div>
+          </div>
+          <div class="field" style="margin-top:18px;max-width:260px;">
+            <label>Sensor Timeout Count</label>
+            <input type="text" id="sensorTimeoutCountField" value="0" disabled>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:26px;">
+            <button type="submit" class="btn-primary">Save Changes</button>
+            <button type="button" class="btn-secondary" id="resetTimeoutCountBtn">Reset Timeout Count</button>
+            <span id="thresholdsSavedMsg" style="display:none;color:var(--green);font-weight:600;font-size:13.5px;">✓ Thresholds saved</span>
+          </div>
+        </form>
+        <p id="thresholdsError" style="display:none;color:var(--red,#e33d3d);font-size:13.5px;margin-top:10px;"></p>
+        <!-- 🔌 INTEGRATION POINT: PUT /api/settings/thresholds -> UPDATE SQL
+             `thresholds` table (per-vehicle or global). This is the exact
+             row the backend compares each incoming ESP32 sensor_readings
+             value against when deciding to raise an alert
+             (see backend/api/server.js -> POST /api/sensor-data). Until the
+             backend is live, thresholds are saved to localStorage and the
+             live dashboard poll in assets/js/dashboard.js compares each
+             reading from GET /api/latest against them client-side. -->
+      </div>
+
+      <!-- SYSTEM -->
+      <div class="tab-panel" id="tab-system" data-group="settings">
+        <div class="form-grid">
+          <div class="field">
+            <label>Database Status</label>
+            <input type="text" value="Connected " disabled>
+          </div>
+          <div class="field">
+            <label>Connected ESP32 Devices</label>
+            <input type="text" value="2 / 2 online" disabled>
+          </div>
+        </div>
+        <!-- 🔌 INTEGRATION POINT: GET /api/system/status -> backend pings the
+             SQL connection pool and counts distinct device_id rows seen in
+             `sensor_readings` within the last "Sensor Offline Timeout"
+             window to populate this tab live. -->
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="../assets/js/mockData.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+</body>
+</html>
