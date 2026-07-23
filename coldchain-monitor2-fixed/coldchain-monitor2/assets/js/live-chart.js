@@ -32,7 +32,7 @@ let humData  = [];
 
 async function loadChartData() {
     try {
-        const response = await fetch("http://localhost:6060/api/sensor-data/recent");
+        const response = await fetch(https://coldchain-monitor.onrender.com/api/sensor-data/recent);
 
         if (!response.ok) {
             throw new Error("Unable to fetch chart data");
