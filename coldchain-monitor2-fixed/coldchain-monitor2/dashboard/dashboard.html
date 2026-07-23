@@ -266,5 +266,82 @@
 <script src="../assets/js/mockData.js"></script>
 <script src="../assets/js/dashboard.js"></script>
 <script src="../assets/js/live-chart.js"></script>
+<script>
+
+async function loadDashboardAlerts(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:6060/api/alerts"
+        );
+
+        const alerts = await response.json();
+
+
+        // only latest 5 alerts for bell
+        const latestAlerts = alerts.slice(0,5);
+
+
+        const box = document.getElementById(
+            "notificationList"
+        );
+
+
+        box.innerHTML="";
+
+
+        latestAlerts.forEach(alert=>{
+
+
+            box.innerHTML += `
+
+            <div class="notification-item">
+
+                <strong>
+                ${alert.type}
+                </strong>
+
+                <br>
+
+                ${alert.vehicle}
+
+                <br>
+
+                <small>
+                ${alert.message}
+                </small>
+
+                <br>
+
+                <span>
+                ${alert.severity}
+                </span>
+
+            </div>
+
+            `;
+
+
+        });
+
+
+    }
+    catch(error){
+
+        console.error(
+            "Dashboard alert error:",
+            error
+        );
+
+    }
+
+}
+
+
+loadDashboardAlerts();
+
+
+</script>
 </body>
 </html>
