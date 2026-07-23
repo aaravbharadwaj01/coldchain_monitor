@@ -33,7 +33,7 @@ parser.on("data", async (line) => {
         console.log("Received:", json);
 
         const response = await axios.post(
-            "http://localhost:6060/api/sensor-data",
+            "https://coldchain-monitor.onrender.com/api/sensor-data",
             json
         );
 
