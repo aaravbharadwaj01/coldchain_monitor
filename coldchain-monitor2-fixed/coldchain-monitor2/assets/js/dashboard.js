@@ -628,7 +628,7 @@ async function loadDashboardData() {
     const banner = document.getElementById("thresholdAlertBanner");
 
     try {
-        const response = await fetch(https://coldchain-monitor.onrender.com/api/latest);
+        const response = await fetch("http://localhost:6060/api/latest");
 
         if (!response.ok) {
             throw new Error("Failed to fetch sensor data");
@@ -660,26 +660,54 @@ async function loadDashboardData() {
         // Min/Max Temperature set on Settings > Thresholds.
         // ---------------------------------------------------------------
         const temp = Number(data.temperature);
-        let breachMessage = null;
-        if(!Number.isNaN(temp)){
-            if(temp > thresholds.maxTemp){
-                breachMessage = `⚠️ Temperature High: ${temp}°C is above the max threshold of ${thresholds.maxTemp}°C`;
-            } else if(temp < thresholds.minTemp){
-                breachMessage = `⚠️ Temperature Low: ${temp}°C is below the min threshold of ${thresholds.minTemp}°C`;
-            }
-        }
+const humidity = Number(data.humidity);
 
-        if(banner){
-            if(breachMessage){
-                banner.textContent = breachMessage;
-                banner.style.display = "flex";
-            } else {
-                banner.style.display = "none";
-            }
-        }
-        const alertsEl = document.getElementById("activeAlerts");
-        if(alertsEl) alertsEl.textContent = breachMessage ? "1" : "0";
+let messages = [];
 
+// Temperature
+if (!Number.isNaN(temp)) {
+
+    if (temp > thresholds.maxTemp) {
+        messages.push(
+            `⚠️ Temperature High: ${temp}°C is above the max threshold of ${thresholds.maxTemp}°C`
+        );
+    }
+
+    if (temp < thresholds.minTemp) {
+        messages.push(
+            `⚠️ Temperature Low: ${temp}°C is below the min threshold of ${thresholds.minTemp}°C`
+        );
+    }
+}
+
+// Humidity
+if (!Number.isNaN(humidity)) {
+
+    if (humidity > thresholds.maxHumidity) {
+        messages.push(
+            `💧 Humidity High: ${humidity}% is above the max threshold of ${thresholds.maxHumidity}%`
+        );
+    }
+}
+
+// Banner
+if (banner) {
+
+    if (messages.length > 0) {
+        banner.innerHTML = messages.join("<br>");
+        banner.style.display = "flex";
+    } else {
+        banner.style.display = "none";
+    }
+}
+
+// Active Alert Count
+const alertsEl = document.getElementById("activeAlerts");
+if (alertsEl) {
+    alertsEl.textContent = messages.length;
+}
+
+       
     } catch (error) {
         console.error("Dashboard Error:", error);
         if(banner){
@@ -717,3 +745,131 @@ if(document.getElementById("avgTemperature")){
     // polling loop last recorded.
     updateTimeoutDisplays();
 }
+async function loadAlertsFromAPI(){
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:6060/api/alerts"
+        );
+
+        const alerts = await response.json();
+
+
+        // -------- Alerts table --------
+
+        const table = document.getElementById("alertsTableBody");
+
+        if(table){
+
+            table.innerHTML = "";
+
+            alerts.forEach(alert => {
+
+                table.innerHTML += `
+                <tr>
+                    <td class="cell-muted">
+                        ${alert.time}
+                    </td>
+
+                    <td class="cell-strong">
+                        ${alert.vehicle}
+                    </td>
+
+                    <td>
+                        ${alert.type}
+                    </td>
+
+                    <td class="cell-muted">
+                        ${alert.message}
+                    </td>
+
+                    <td>
+                        <span class="pill ${alert.severity.toLowerCase()}">
+                            ${alert.severity}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="pill ${alert.status.toLowerCase()}">
+                            ${alert.status}
+                        </span>
+                    </td>
+
+                </tr>
+                `;
+
+            });
+
+        }
+
+
+
+        // -------- Bell dropdown --------
+
+        const bell = document.getElementById("bellList");
+
+        if(bell){
+
+            bell.innerHTML="";
+
+            alerts.slice(0,5).forEach(alert=>{
+
+                bell.innerHTML += `
+
+                <div class="bell-item">
+
+                    <strong>
+                    ${alert.type}
+                    </strong>
+
+                    <br>
+
+                    ${alert.vehicle}
+
+                    <br>
+
+                    <small>
+                    ${alert.message}
+                    </small>
+
+                </div>
+
+                `;
+
+            });
+
+        }
+
+
+
+        // -------- Bell red dot --------
+
+        const dot = document.getElementById("bellDot");
+
+        if(dot){
+
+            if(alerts.length > 0){
+                dot.style.display="block";
+            }
+            else{
+                dot.style.display="none";
+            }
+
+        }
+
+
+    }
+    catch(error){
+
+        console.error(
+            "Alert API error:",
+            error
+        );
+
+    }
+
+}
+
+
+loadAlertsFromAPI();
