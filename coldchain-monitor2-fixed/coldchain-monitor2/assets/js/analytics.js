@@ -2,7 +2,7 @@ async function loadAnalytics() {
     try {
         console.log("Loading Analytics...");
 
-        const response = await fetch("http://localhost:6060/api/sensor-data/recent");
+        const response = await fetch(https://coldchain-monitor.onrender.com/api/sensor-data/recent);
 
         if (!response.ok) {
             throw new Error("Failed to fetch analytics data");
