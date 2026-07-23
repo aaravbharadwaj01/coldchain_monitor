@@ -82,11 +82,9 @@
         <option>Active</option>
         <option>Resolved</option>
       </select>
-      <input type="date" class="filter-select" id="alertDateFilter" value="2025-05-16">
-      <select class="filter-select" style="min-width:110px;" id="alertExportSelect">
-        <option>Export</option>
-        <option>Export CSV</option>
-        <option>Export PDF</option>
+      <input type="date" class="filter-select" id="alertDateFilter" value="2026-07-24">
+      
+        
       </select>
     </div>
 
@@ -103,52 +101,7 @@
           </tr>
         </thead>
         <tbody id="alertsTableBody">
-          <tr>
-            <td class="cell-muted">10:24 AM</td>
-            <td class="cell-strong">RJ14 AB 4587</td>
-            <td>Temperature High</td>
-            <td class="cell-muted">Temperature reached 31.2°C</td>
-            <td><span class="pill high">High</span></td>
-            <td><span class="pill active">Active</span></td>
-          </tr>
-          <tr>
-            <td class="cell-muted">09:56 AM</td>
-            <td class="cell-strong">DL1L AB 1234</td>
-            <td>Humidity High</td>
-            <td class="cell-muted">Humidity reached 72%</td>
-            <td><span class="pill medium">Medium</span></td>
-            <td><span class="pill active">Active</span></td>
-          </tr>
-          <tr>
-            <td class="cell-muted">08:40 AM</td>
-            <td class="cell-strong">RJ14 AB 4587</td>
-            <td>Temperature Low</td>
-            <td class="cell-muted">Temperature dropped to 2.1°C</td>
-            <td><span class="pill high">High</span></td>
-            <td><span class="pill resolved">Resolved</span></td>
-          </tr>
-          <tr>
-            <td class="cell-muted">07:15 AM</td>
-            <td class="cell-strong">DL1L AB 1234</td>
-            <td>Sensor Offline</td>
-            <td class="cell-muted">Sensor not responding</td>
-            <td><span class="pill high">High</span></td>
-            <td><span class="pill resolved">Resolved</span></td>
-          </tr>
-          <tr>
-            <td class="cell-muted">06:30 AM</td>
-            <td class="cell-strong">RJ14 AB 4587</td>
-            <td>Door Open</td>
-            <td class="cell-muted">Door was opened for 2 min</td>
-            <td><span class="pill low">Low</span></td>
-            <td><span class="pill resolved">Resolved</span></td>
-          </tr>
-          <!-- 🔌 INTEGRATION POINT: replace the static <tr> rows above by
-               rendering one row per alert returned from getAlerts() in
-               assets/js/mockData.js (GET /api/alerts, reads SQL `alerts`
-               table). Alerts should be INSERTed server-side the instant a
-               reading POSTed by the ESP32 crosses a threshold defined in
-               Settings > Thresholds. -->
+         
         </tbody>
       </table>
     </div>
@@ -158,5 +111,104 @@
 
 <script src="../assets/js/mockData.js"></script>
 <script src="../assets/js/dashboard.js"></script>
+
+
+<script>
+
+async function loadAlerts(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:6060/api/alerts"
+        );
+
+
+        const alerts = await response.json();
+
+
+        const tbody = document.getElementById(
+            "alertsTableBody"
+        );
+
+
+        tbody.innerHTML="";
+
+
+        alerts.forEach(alert=>{
+
+
+            tbody.innerHTML += `
+
+            <tr>
+
+            <td class="cell-muted">
+            ${new Date(alert.time).toLocaleString()}
+            </td>
+
+
+            <td class="cell-strong">
+            ${alert.vehicle}
+            </td>
+
+
+            <td>
+            ${alert.type}
+            </td>
+
+
+            <td class="cell-muted">
+            ${alert.message}
+            </td>
+
+
+            <td>
+            <span class="pill ${alert.severity.toLowerCase()}">
+            ${alert.severity}
+            </span>
+            </td>
+
+
+            <td>
+            <span class="pill ${alert.status.toLowerCase()}">
+            ${alert.status}
+            </span>
+            </td>
+
+
+            </tr>
+
+            `;
+
+
+        });
+
+
+    }
+
+    catch(error){
+
+        console.error(
+            "Alert loading error:",
+            error
+        );
+
+    }
+
+}
+
+
+
+loadAlerts();
+
+
+// refresh every 5 seconds
+setInterval(loadAlerts,5000);
+
+
+</script>
+
+
+</body>
 </body>
 </html>
