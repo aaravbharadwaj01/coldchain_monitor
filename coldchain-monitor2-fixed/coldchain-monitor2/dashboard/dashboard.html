@@ -273,7 +273,7 @@ async function loadDashboardAlerts(){
     try{
 
         const response = await fetch(
-            "http://localhost:6060/api/alerts"
+            "https://coldchain-monitor.onrender.com/api/alerts"
         );
 
         const alerts = await response.json();
