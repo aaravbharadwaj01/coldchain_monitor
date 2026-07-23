@@ -205,7 +205,7 @@
           </div>
           <div class="field">
             <label>Connected ESP32 Devices</label>
-            <input type="text" value="2 / 2 online" disabled>
+            <input type="text" value="1 / 1 online" disabled>
           </div>
         </div>
         <!-- 🔌 INTEGRATION POINT: GET /api/system/status -> backend pings the
@@ -221,5 +221,89 @@
 
 <script src="../assets/js/mockData.js"></script>
 <script src="../assets/js/dashboard.js"></script>
+
+<script>
+
+document.getElementById("thresholdsForm").addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+
+    const data = {
+
+        minTemperature: Number(
+            document.getElementById("minTempInput").value
+        ),
+
+        maxTemperature: Number(
+            document.getElementById("maxTempInput").value
+        ),
+
+        maxHumidity: Number(
+            document.getElementById("maxHumidityInput").value
+        ),
+
+        offlineTimeoutMins: Number(
+            document.getElementById("offlineTimeoutInput").value
+        ),
+
+        vehicleId: null
+    };
+
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:6060/api/settings/thresholds",
+            {
+                method:"PUT",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify(data)
+            }
+        );
+
+
+        const result = await response.json();
+
+
+        if(result.ok){
+
+            document.getElementById("thresholdsSavedMsg").style.display="inline";
+
+            // also update dashboard localStorage
+            localStorage.setItem(
+                "thresholds",
+                JSON.stringify({
+
+                    minTemp:data.minTemperature,
+                    maxTemp:data.maxTemperature,
+                    maxHumidity:data.maxHumidity,
+                    offlineTimeoutMins:data.offlineTimeoutMins
+
+                })
+            );
+
+        }
+
+
+    }catch(err){
+
+        console.log(err);
+
+        document.getElementById("thresholdsError").innerHTML =
+        "Cannot save threshold";
+
+        document.getElementById("thresholdsError").style.display="block";
+
+    }
+
+
+});
+
+</script>
 </body>
 </html>
