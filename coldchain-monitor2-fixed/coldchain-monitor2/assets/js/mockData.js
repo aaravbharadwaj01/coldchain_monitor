@@ -116,12 +116,13 @@ const MOCK_MAINTENANCE = [
 // =====================================================================
 
 async function getVehicles() {
-  // ------------------------------------------------------------------
-  // 🔌 INTEGRATION POINT: replace with —
-  // const res = await fetch("/api/vehicles");        // GET, reads SQL `vehicles` JOIN latest sensor_readings
-  // return await res.json();
-  // ------------------------------------------------------------------
-  return Promise.resolve(MOCK_VEHICLES);
+    const response = await fetch("https://coldchain-monitor.onrender.com/api/vehicles");
+
+    if (!response.ok) {
+        throw new Error("Failed to load vehicles");
+    }
+
+    return await response.json();
 }
 
 async function getAlerts() {
