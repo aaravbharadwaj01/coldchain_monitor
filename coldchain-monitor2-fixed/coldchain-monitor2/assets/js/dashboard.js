@@ -628,7 +628,7 @@ async function loadDashboardData() {
     const banner = document.getElementById("thresholdAlertBanner");
 
     try {
-        const response = await fetch("http://localhost:6060/api/latest");
+        const response = await fetch("https://coldchain-monitor.onrender.com/api/latest");
 
         if (!response.ok) {
             throw new Error("Failed to fetch sensor data");
@@ -750,7 +750,7 @@ async function loadAlertsFromAPI(){
     try {
 
         const response = await fetch(
-            "http://localhost:6060/api/alerts"
+            "https://coldchain-monitor.onrender.com/api/alerts"
         );
 
         const alerts = await response.json();
