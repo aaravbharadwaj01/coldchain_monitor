@@ -88,37 +88,7 @@
           </tr>
         </thead>
         <tbody id="vehiclesTableBody">
-          <tr>
-            <td class="cell-strong">RJ14 AB 4587</td>
-            <td>Jaipur — Ajmer</td>
-            <td>Mohan Singh</td>
-            <td><span class="pill online">Online</span></td>
-            <td class="cell-muted">10:30 AM, 16 May 2025</td>
-            <td>
-              <div class="row-actions">
-                <button class="icon-btn" title="Edit">✎</button>
-                <button class="icon-btn danger" title="Delete">🗑</button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="cell-strong">DL1L AB 1234</td>
-            <td>Delhi — Alwar</td>
-            <td>Rakesh Kumar</td>
-            <td><span class="pill online">Online</span></td>
-            <td class="cell-muted">10:28 AM, 16 May 2025</td>
-            <td>
-              <div class="row-actions">
-                <button class="icon-btn" title="Edit">✎</button>
-                <button class="icon-btn danger" title="Delete">🗑</button>
-              </div>
-            </td>
-          </tr>
-          <!-- 🔌 INTEGRATION POINT: replace the two static <tr> rows above by
-               rendering one row per vehicle returned from getVehicles() in
-               assets/js/mockData.js (which will call GET /api/vehicles,
-               reading the SQL `vehicles` table). Delete/Edit buttons should
-               call DELETE /api/vehicles/:id and PUT /api/vehicles/:id. -->
+          <tr><td colspan="6" class="cell-muted" style="text-align:center;padding:28px;">Loading vehicles…</td></tr>
         </tbody>
       </table>
       <div class="no-results" id="vehiclesNoResults" style="display:none;">No vehicles match your search.</div>
@@ -146,7 +116,9 @@
         </div>
         <div class="field">
           <label for="vehicleDriverInput">Driver</label>
-          <input type="text" id="vehicleDriverInput" placeholder="e.g. Mohan Singh">
+          <select id="vehicleDriverInput">
+            <option value="">— Unassigned —</option>
+          </select>
         </div>
         <div class="field">
           <label for="vehicleStatusInput">Status</label>
