@@ -80,33 +80,7 @@
           </tr>
         </thead>
         <tbody id="maintenanceTableBody">
-          <tr>
-            <td class="cell-strong">RJ14 AB 4587</td>
-            <td>Sensor Calibration</td>
-            <td class="cell-muted">20 May 2025</td>
-            <td><span class="pill healthy">Upcoming</span></td>
-            <td>
-              <div class="row-actions">
-                <button class="icon-btn" title="Edit">✎</button>
-                <button class="icon-btn danger" title="Delete">🗑</button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="cell-strong">DL1L AB 1234</td>
-            <td>Refrigeration Unit Service</td>
-            <td class="cell-muted">18 May 2025</td>
-            <td><span class="pill warning">Due Soon</span></td>
-            <td>
-              <div class="row-actions">
-                <button class="icon-btn" title="Edit">✎</button>
-                <button class="icon-btn danger" title="Delete">🗑</button>
-              </div>
-            </td>
-          </tr>
-          <!-- 🔌 INTEGRATION POINT: render one row per record from
-               getMaintenanceLogs() in assets/js/mockData.js (GET
-               /api/maintenance, reads SQL `maintenance_logs` table) -->
+          <tr><td colspan="5" class="cell-muted" style="text-align:center;padding:28px;">Loading maintenance logs…</td></tr>
         </tbody>
       </table>
     </div>
@@ -125,7 +99,9 @@
       <div class="modal-body">
         <div class="field">
           <label for="maintenanceVehicleInput">Vehicle</label>
-          <input type="text" id="maintenanceVehicleInput" placeholder="e.g. RJ14 AB 4587" required>
+          <select id="maintenanceVehicleInput" required>
+            <option value="" disabled selected>Select a vehicle…</option>
+          </select>
         </div>
         <div class="field">
           <label for="maintenanceTaskInput">Task</label>
