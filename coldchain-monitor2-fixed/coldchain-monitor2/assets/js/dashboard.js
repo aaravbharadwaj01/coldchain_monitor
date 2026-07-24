@@ -489,132 +489,299 @@ function updateTimeoutDisplays(){
 })();
 
 // =====================================================================
-// VEHICLES PAGE — Add Vehicle modal
-// 🔌 INTEGRATION POINT: swap the client-side push below for
-// POST /api/vehicles (see backend/api/server.js), then re-fetch
-// getVehicles() from mockData.js.
+// Shared helper: never trust free text (driver names, tasks, etc.)
+// straight into innerHTML.
+// =====================================================================
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[ch]));
+}
+
+// =====================================================================
+// VEHICLES PAGE — live data (GET/POST/DELETE /api/vehicles)
 // =====================================================================
 (function initVehiclesPage(){
   const tbody = document.getElementById("vehiclesTableBody");
   const form = document.getElementById("addVehicleForm");
+  const driverSelect = document.getElementById("vehicleDriverInput");
   if(!tbody || !form) return;
 
-  form.addEventListener("submit", (e)=>{
+  function renderVehicles(vehicles){
+    if(!vehicles.length){
+      tbody.innerHTML = `<tr><td colspan="6" class="cell-muted" style="text-align:center;padding:28px;">No vehicles yet — add one above.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = vehicles.map(v => {
+      const statusClass = v.status === "Online" ? "online" : "offline";
+      const lastUpdated = v.lastUpdated ? new Date(v.lastUpdated).toLocaleString([], {hour:"2-digit", minute:"2-digit", day:"2-digit", month:"short", year:"numeric"}) : "—";
+      return `
+      <tr data-id="${v.id}">
+        <td class="cell-strong">${escapeHtml(v.plate)}</td>
+        <td>${escapeHtml(v.route) || "—"}</td>
+        <td>${escapeHtml(v.driver) || "—"}</td>
+        <td><span class="pill ${statusClass}">${v.status || "Offline"}</span></td>
+        <td class="cell-muted">${lastUpdated}</td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn danger" title="Delete" data-delete-vehicle="${v.id}">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  async function loadVehicles(){
+    try {
+      const vehicles = await getVehicles();
+      renderVehicles(vehicles);
+    } catch (err) {
+      console.error("Vehicles load error:", err);
+      tbody.innerHTML = `<tr><td colspan="6" class="cell-muted" style="text-align:center;padding:28px;">⚠️ Unable to reach the server — check that the backend is running.</td></tr>`;
+    }
+  }
+
+  async function loadDriverOptions(){
+    if(!driverSelect) return;
+    try {
+      const drivers = await getDrivers();
+      driverSelect.innerHTML = `<option value="">— Unassigned —</option>` +
+        drivers.map(d => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join("");
+    } catch (err) {
+      console.error("Driver list load error:", err);
+    }
+  }
+
+  form.addEventListener("submit", async (e)=>{
     e.preventDefault();
     const plate = document.getElementById("vehiclePlateInput").value.trim();
     const route = document.getElementById("vehicleRouteInput").value.trim();
-    const driver = document.getElementById("vehicleDriverInput").value.trim();
-    const status = document.getElementById("vehicleStatusInput").value;
+    const driverId = driverSelect ? driverSelect.value : "";
     if(!plate) return;
 
-    const statusClass = status === "Online" ? "online" : "offline";
-    const now = new Date();
-    const timestamp = now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}) + ", " +
-                       now.toLocaleDateString([], {day:"2-digit", month:"short", year:"numeric"});
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = true;
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="cell-strong">${plate}</td>
-      <td>${route || "—"}</td>
-      <td>${driver || "—"}</td>
-      <td><span class="pill ${statusClass}">${status}</span></td>
-      <td class="cell-muted">${timestamp}</td>
-      <td>
-        <div class="row-actions">
-          <button class="icon-btn" title="Edit">✎</button>
-          <button class="icon-btn danger" title="Delete">🗑</button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(row);
-
-    form.reset();
-    closeModal("addVehicleModal");
+    try {
+      await addVehicle({ plate, route, driverId });
+      form.reset();
+      closeModal("addVehicleModal");
+      await loadVehicles();
+    } catch (err) {
+      console.error("Add vehicle error:", err);
+      alert(`Couldn't add vehicle: ${err.message}`);
+    } finally {
+      if(submitBtn) submitBtn.disabled = false;
+    }
   });
+
+  tbody.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("[data-delete-vehicle]");
+    if(!btn) return;
+    const id = btn.getAttribute("data-delete-vehicle");
+    if(!confirm("Delete this vehicle? This also removes its sensor history.")) return;
+    try {
+      await deleteVehicle(id);
+      await loadVehicles();
+    } catch (err) {
+      console.error("Delete vehicle error:", err);
+      alert(`Couldn't delete vehicle: ${err.message}`);
+    }
+  });
+
+  loadDriverOptions();
+  loadVehicles();
 })();
 
 // =====================================================================
-// DRIVERS PAGE — Add Driver modal
-// 🔌 INTEGRATION POINT: swap the client-side push below for
-// POST /api/drivers (see backend/api/server.js), then re-fetch
-// getDrivers() from mockData.js.
+// DRIVERS PAGE — live data (GET/POST/DELETE /api/drivers)
 // =====================================================================
 (function initDriversPage(){
   const tbody = document.getElementById("driversTableBody");
   const form = document.getElementById("addDriverForm");
+  const vehicleSelect = document.getElementById("driverVehicleInput");
   if(!tbody || !form) return;
 
-  form.addEventListener("submit", (e)=>{
+  function renderDrivers(drivers){
+    if(!drivers.length){
+      tbody.innerHTML = `<tr><td colspan="6" class="cell-muted" style="text-align:center;padding:28px;">No drivers yet — add one above.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = drivers.map(d => `
+      <tr data-id="${d.id}">
+        <td class="cell-strong">${escapeHtml(d.name)}</td>
+        <td class="cell-muted">${escapeHtml(d.phone) || "—"}</td>
+        <td>${escapeHtml(d.vehicle) || "—"}</td>
+        <td class="cell-muted">${escapeHtml(d.license) || "—"}</td>
+        <td><span class="pill healthy">${escapeHtml(d.status)}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn danger" title="Delete" data-delete-driver="${d.id}">🗑</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  async function loadDrivers(){
+    try {
+      const drivers = await getDrivers();
+      renderDrivers(drivers);
+    } catch (err) {
+      console.error("Drivers load error:", err);
+      tbody.innerHTML = `<tr><td colspan="6" class="cell-muted" style="text-align:center;padding:28px;">⚠️ Unable to reach the server — check that the backend is running.</td></tr>`;
+    }
+  }
+
+  async function loadVehicleOptions(){
+    if(!vehicleSelect) return;
+    try {
+      const vehicles = await getVehicles();
+      vehicleSelect.innerHTML = `<option value="">— Unassigned —</option>` +
+        vehicles.map(v => `<option value="${v.id}">${escapeHtml(v.plate)}</option>`).join("");
+    } catch (err) {
+      console.error("Vehicle list load error:", err);
+    }
+  }
+
+  form.addEventListener("submit", async (e)=>{
     e.preventDefault();
     const name = document.getElementById("driverNameInput").value.trim();
     const phone = document.getElementById("driverPhoneInput").value.trim();
-    const vehicle = document.getElementById("driverVehicleInput").value.trim();
+    const vehicleId = vehicleSelect ? vehicleSelect.value : "";
     const license = document.getElementById("driverLicenseInput").value.trim();
     const status = document.getElementById("driverStatusInput").value;
     if(!name) return;
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="cell-strong">${name}</td>
-      <td class="cell-muted">${phone || "—"}</td>
-      <td>${vehicle || "—"}</td>
-      <td class="cell-muted">${license || "—"}</td>
-      <td><span class="pill healthy">${status}</span></td>
-      <td>
-        <div class="row-actions">
-          <button class="icon-btn" title="Edit">✎</button>
-          <button class="icon-btn danger" title="Delete">🗑</button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(row);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = true;
 
-    form.reset();
-    closeModal("addDriverModal");
+    try {
+      await addDriver({ name, phone, license, status, vehicleId });
+      form.reset();
+      closeModal("addDriverModal");
+      await loadDrivers();
+      await loadVehicleOptions();
+    } catch (err) {
+      console.error("Add driver error:", err);
+      alert(`Couldn't add driver: ${err.message}`);
+    } finally {
+      if(submitBtn) submitBtn.disabled = false;
+    }
   });
+
+  tbody.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("[data-delete-driver]");
+    if(!btn) return;
+    const id = btn.getAttribute("data-delete-driver");
+    if(!confirm("Delete this driver? Any vehicle they're assigned to will become unassigned.")) return;
+    try {
+      await deleteDriver(id);
+      await loadDrivers();
+    } catch (err) {
+      console.error("Delete driver error:", err);
+      alert(`Couldn't delete driver: ${err.message}`);
+    }
+  });
+
+  loadVehicleOptions();
+  loadDrivers();
 })();
 
 // =====================================================================
-// MAINTENANCE PAGE — Schedule Maintenance modal
-// 🔌 INTEGRATION POINT: swap the client-side push below for
-// POST /api/maintenance (see backend/api/server.js), then re-fetch
-// getMaintenanceLogs() from mockData.js.
+// MAINTENANCE PAGE — live data (GET/POST/DELETE /api/maintenance)
 // =====================================================================
 (function initMaintenancePage(){
   const tbody = document.getElementById("maintenanceTableBody");
   const form = document.getElementById("scheduleMaintenanceForm");
+  const vehicleSelect = document.getElementById("maintenanceVehicleInput");
   if(!tbody || !form) return;
 
   const statusPillClass = { "Upcoming":"healthy", "Due Soon":"warning", "Overdue":"critical", "Completed":"healthy" };
 
-  form.addEventListener("submit", (e)=>{
+  function renderMaintenance(logs){
+    if(!logs.length){
+      tbody.innerHTML = `<tr><td colspan="5" class="cell-muted" style="text-align:center;padding:28px;">No maintenance scheduled — add one above.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = logs.map(m => {
+      const dueDate = m.dueDate ? new Date(m.dueDate).toLocaleDateString([], {day:"2-digit", month:"short", year:"numeric"}) : "—";
+      return `
+      <tr data-id="${m.id}">
+        <td class="cell-strong">${escapeHtml(m.vehicle)}</td>
+        <td>${escapeHtml(m.task)}</td>
+        <td class="cell-muted">${dueDate}</td>
+        <td><span class="pill ${statusPillClass[m.status] || 'healthy'}">${escapeHtml(m.status)}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn danger" title="Delete" data-delete-maintenance="${m.id}">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  async function loadMaintenance(){
+    try {
+      const logs = await getMaintenanceLogs();
+      renderMaintenance(logs);
+    } catch (err) {
+      console.error("Maintenance load error:", err);
+      tbody.innerHTML = `<tr><td colspan="5" class="cell-muted" style="text-align:center;padding:28px;">⚠️ Unable to reach the server — check that the backend is running.</td></tr>`;
+    }
+  }
+
+  async function loadVehicleOptions(){
+    if(!vehicleSelect) return;
+    try {
+      const vehicles = await getVehicles();
+      vehicleSelect.innerHTML = `<option value="" disabled ${vehicles.length ? "selected" : ""}>Select a vehicle…</option>` +
+        vehicles.map(v => `<option value="${v.id}">${escapeHtml(v.plate)}</option>`).join("");
+    } catch (err) {
+      console.error("Vehicle list load error:", err);
+    }
+  }
+
+  form.addEventListener("submit", async (e)=>{
     e.preventDefault();
-    const vehicle = document.getElementById("maintenanceVehicleInput").value.trim();
+    const vehicleId = vehicleSelect ? vehicleSelect.value : "";
     const task = document.getElementById("maintenanceTaskInput").value.trim();
-    const dueDateRaw = document.getElementById("maintenanceDueDateInput").value;
+    const dueDate = document.getElementById("maintenanceDueDateInput").value;
     const status = document.getElementById("maintenanceStatusInput").value;
-    if(!vehicle || !task || !dueDateRaw) return;
+    if(!vehicleId || !task || !dueDate) return;
 
-    const dueDate = new Date(dueDateRaw).toLocaleDateString([], {day:"2-digit", month:"short", year:"numeric"});
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = true;
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="cell-strong">${vehicle}</td>
-      <td>${task}</td>
-      <td class="cell-muted">${dueDate}</td>
-      <td><span class="pill ${statusPillClass[status] || 'healthy'}">${status}</span></td>
-      <td>
-        <div class="row-actions">
-          <button class="icon-btn" title="Edit">✎</button>
-          <button class="icon-btn danger" title="Delete">🗑</button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(row);
-
-    form.reset();
-    closeModal("scheduleMaintenanceModal");
+    try {
+      await addMaintenance({ vehicleId, task, dueDate, status });
+      form.reset();
+      closeModal("scheduleMaintenanceModal");
+      await loadMaintenance();
+    } catch (err) {
+      console.error("Schedule maintenance error:", err);
+      alert(`Couldn't schedule maintenance: ${err.message}`);
+    } finally {
+      if(submitBtn) submitBtn.disabled = false;
+    }
   });
+
+  tbody.addEventListener("click", async (e)=>{
+    const btn = e.target.closest("[data-delete-maintenance]");
+    if(!btn) return;
+    const id = btn.getAttribute("data-delete-maintenance");
+    if(!confirm("Delete this maintenance log?")) return;
+    try {
+      await deleteMaintenance(id);
+      await loadMaintenance();
+    } catch (err) {
+      console.error("Delete maintenance error:", err);
+      alert(`Couldn't delete log: ${err.message}`);
+    }
+  });
+
+  loadVehicleOptions();
+  loadMaintenance();
 })();
 
 
