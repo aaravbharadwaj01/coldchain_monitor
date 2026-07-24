@@ -379,12 +379,51 @@ app.get("/api/analytics/summary", async (req, res) => {
 app.get("/api/drivers", async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT d.name, d.phone, d.license_no AS license, d.status,
+      SELECT d.id, d.name, d.phone, d.license_no AS license, d.status,
              v.plate_number AS vehicle
       FROM drivers d
       LEFT JOIN vehicles v ON v.driver_id = d.id
     `);
     res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create a driver, optionally assigning them to an existing vehicle
+// (vehicles.driver_id is the FK, so "assigning" means updating that row).
+app.post("/api/drivers", async (req, res) => {
+  try {
+    const { name, phone, license, status, vehicleId } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Driver name is required" });
+    }
+
+    const [result] = await pool.query(
+      "INSERT INTO drivers (name, phone, license_no, status) VALUES (?, ?, ?, ?)",
+      [name, phone || null, license || null, status || "Off Duty"]
+    );
+
+    const driverId = result.insertId;
+
+    if (vehicleId) {
+      await pool.query("UPDATE vehicles SET driver_id = ? WHERE id = ?", [driverId, vehicleId]);
+    }
+
+    res.status(201).json({ id: driverId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/drivers/:id", async (req, res) => {
+  try {
+    // Unlink from any vehicle first so the FK doesn't block the delete.
+    await pool.query("UPDATE vehicles SET driver_id = NULL WHERE driver_id = ?", [req.params.id]);
+    await pool.query("DELETE FROM drivers WHERE id = ?", [req.params.id]);
+    res.status(204).end();
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -397,12 +436,41 @@ app.get("/api/drivers", async (req, res) => {
 app.get("/api/maintenance", async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT v.plate_number AS vehicle, m.task, m.due_date AS dueDate, m.status
+      SELECT m.id, v.plate_number AS vehicle, m.task, m.due_date AS dueDate, m.status
       FROM maintenance_logs m
       JOIN vehicles v ON v.id = m.vehicle_id
       ORDER BY m.due_date ASC
     `);
     res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/maintenance", async (req, res) => {
+  try {
+    const { vehicleId, task, dueDate, status } = req.body;
+    if (!vehicleId || !task || !dueDate) {
+      return res.status(400).json({ error: "vehicleId, task and dueDate are required" });
+    }
+
+    const [result] = await pool.query(
+      "INSERT INTO maintenance_logs (vehicle_id, task, due_date, status) VALUES (?, ?, ?, ?)",
+      [vehicleId, task, dueDate, status || "Upcoming"]
+    );
+
+    res.status(201).json({ id: result.insertId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/maintenance/:id", async (req, res) => {
+  try {
+    await pool.query("DELETE FROM maintenance_logs WHERE id = ?", [req.params.id]);
+    res.status(204).end();
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
