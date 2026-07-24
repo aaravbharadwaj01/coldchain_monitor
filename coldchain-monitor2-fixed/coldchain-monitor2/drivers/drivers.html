@@ -81,35 +81,7 @@
           </tr>
         </thead>
         <tbody id="driversTableBody">
-          <tr>
-            <td class="cell-strong">Mohan Singh</td>
-            <td class="cell-muted">+91 98765 43210</td>
-            <td>RJ14 AB 4587</td>
-            <td class="cell-muted">RJ-0420190001234</td>
-            <td><span class="pill healthy">On Duty</span></td>
-            <td>
-              <div class="row-actions">
-                <button class="icon-btn" title="Edit">✎</button>
-                <button class="icon-btn danger" title="Delete">🗑</button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="cell-strong">Rakesh Kumar</td>
-            <td class="cell-muted">+91 91234 56780</td>
-            <td>DL1L AB 1234</td>
-            <td class="cell-muted">DL-0320180005678</td>
-            <td><span class="pill healthy">On Duty</span></td>
-            <td>
-              <div class="row-actions">
-                <button class="icon-btn" title="Edit">✎</button>
-                <button class="icon-btn danger" title="Delete">🗑</button>
-              </div>
-            </td>
-          </tr>
-          <!-- 🔌 INTEGRATION POINT: render one row per driver from
-               getDrivers() in assets/js/mockData.js (GET /api/drivers,
-               reads SQL `drivers` table, FK assigned_vehicle_id -> vehicles.id) -->
+          <tr><td colspan="6" class="cell-muted" style="text-align:center;padding:28px;">Loading drivers…</td></tr>
         </tbody>
       </table>
     </div>
@@ -136,7 +108,9 @@
         </div>
         <div class="field">
           <label for="driverVehicleInput">Assigned Vehicle</label>
-          <input type="text" id="driverVehicleInput" placeholder="e.g. RJ14 AB 4587">
+          <select id="driverVehicleInput">
+            <option value="">— Unassigned —</option>
+          </select>
         </div>
         <div class="field">
           <label for="driverLicenseInput">License No.</label>
