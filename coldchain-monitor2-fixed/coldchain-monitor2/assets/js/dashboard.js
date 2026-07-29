@@ -937,73 +937,90 @@ async function loadDashboardData() {
         localStorage.setItem(LAST_READING_KEY, String(Date.now()));
         localStorage.setItem(TIMEOUT_FLAG_KEY, "false");
 
-        // Temperature
+        const temp = Number(data.temperature);
+        const humidity = Number(data.humidity);
+        const tempStr = Number.isNaN(temp) ? "--" : temp.toFixed(2);
+        const humStr = Number.isNaN(humidity) ? "--" : humidity.toFixed(2);
+
+        // Top stat cards (Avg. Temperature / Humidity)
         const tempEl = document.getElementById("avgTemperature");
-        if(tempEl) tempEl.textContent = data.temperature + " °C";
+        if(tempEl) tempEl.textContent = tempStr + " °C";
 
-        // Humidity
         const humEl = document.getElementById("avgHumidity");
-        if(humEl) humEl.textContent = data.humidity + " %";
+        if(humEl) humEl.textContent = humStr + " %";
 
-        // You can update these later from database APIs
+        // Vehicle card — same live reading (was hardcoded before, which is why it looked fixed)
+        const liveTemp = document.getElementById("liveVehicleTemp");
+        if(liveTemp) liveTemp.textContent = tempStr + "°C";
+        const liveHum = document.getElementById("liveVehicleHumidity");
+        if(liveHum) liveHum.textContent = humStr + "%";
+
         const totalEl = document.getElementById("totalVehicles");
         if(totalEl) totalEl.textContent = "1";
         const onlineEl = document.getElementById("onlineVehicles");
         if(onlineEl) onlineEl.textContent = "1";
 
         // ---------------------------------------------------------------
-        // 🔌 Threshold check — alerts if temperature is above/below the
-        // Min/Max Temperature set on Settings > Thresholds.
+        // Threshold check — updates status pill on the vehicle card too
         // ---------------------------------------------------------------
-        const temp = Number(data.temperature);
-const humidity = Number(data.humidity);
+        let messages = [];
+        let statusLabel = "Healthy";
+        let statusClass = "healthy";
+        let tempMetricClass = "temp";
 
-let messages = [];
+        if (!Number.isNaN(temp)) {
+            if (temp > thresholds.maxTemp) {
+                messages.push(
+                    `⚠️ Temperature High: ${temp}°C is above the max threshold of ${thresholds.maxTemp}°C`
+                );
+                statusLabel = "Warning";
+                statusClass = "warning";
+                tempMetricClass = "temp2";
+            }
+            if (temp < thresholds.minTemp) {
+                messages.push(
+                    `⚠️ Temperature Low: ${temp}°C is below the min threshold of ${thresholds.minTemp}°C`
+                );
+                statusLabel = "Warning";
+                statusClass = "warning";
+                tempMetricClass = "temp2";
+            }
+        }
 
-// Temperature
-if (!Number.isNaN(temp)) {
+        if (!Number.isNaN(humidity)) {
+            if (humidity > thresholds.maxHumidity) {
+                messages.push(
+                    `💧 Humidity High: ${humidity}% is above the max threshold of ${thresholds.maxHumidity}%`
+                );
+                statusLabel = "Warning";
+                statusClass = "warning";
+            }
+        }
 
-    if (temp > thresholds.maxTemp) {
-        messages.push(
-            `⚠️ Temperature High: ${temp}°C is above the max threshold of ${thresholds.maxTemp}°C`
-        );
-    }
+        const statusPill = document.getElementById("liveVehicleStatus");
+        if(statusPill){
+            statusPill.textContent = statusLabel;
+            statusPill.className = "status-pill " + statusClass;
+        }
+        const card = document.getElementById("liveVehicleCard");
+        if(card) card.dataset.status = statusLabel;
+        const metricTemp = liveTemp && liveTemp.closest(".metric");
+        if(metricTemp) metricTemp.className = "metric " + tempMetricClass;
 
-    if (temp < thresholds.minTemp) {
-        messages.push(
-            `⚠️ Temperature Low: ${temp}°C is below the min threshold of ${thresholds.minTemp}°C`
-        );
-    }
-}
+        if (banner) {
+            if (messages.length > 0) {
+                banner.innerHTML = messages.join("<br>");
+                banner.style.display = "flex";
+            } else {
+                banner.style.display = "none";
+            }
+        }
 
-// Humidity
-if (!Number.isNaN(humidity)) {
+        const alertsEl = document.getElementById("activeAlerts");
+        if (alertsEl) {
+            alertsEl.textContent = messages.length;
+        }
 
-    if (humidity > thresholds.maxHumidity) {
-        messages.push(
-            `💧 Humidity High: ${humidity}% is above the max threshold of ${thresholds.maxHumidity}%`
-        );
-    }
-}
-
-// Banner
-if (banner) {
-
-    if (messages.length > 0) {
-        banner.innerHTML = messages.join("<br>");
-        banner.style.display = "flex";
-    } else {
-        banner.style.display = "none";
-    }
-}
-
-// Active Alert Count
-const alertsEl = document.getElementById("activeAlerts");
-if (alertsEl) {
-    alertsEl.textContent = messages.length;
-}
-
-       
     } catch (error) {
         console.error("Dashboard Error:", error);
         if(banner){
