@@ -94,7 +94,7 @@
 
       <div class="stat-card c-temp">
         <div class="stat-top">
-          <div><div class="stat-label">Temperature</div></div>
+          <div><div class="stat-label">Avg. Temperature</div></div>
           <div class="stat-icon">🌡️</div>
         </div>
         <div class="stat-value" id="avgTemperature">-- °C</div>
@@ -103,7 +103,7 @@
 
       <div class="stat-card c-humidity">
         <div class="stat-top">
-          <div><div class="stat-label">Humidity</div></div>
+          <div><div class="stat-label">Avg. Humidity</div></div>
           <div class="stat-icon">💧</div>
         </div>
        <div class="stat-value" id="avgHumidity">-- %</div>
@@ -149,34 +149,20 @@
         <div class="panel-header"><h3>Your Vehicles</h3></div>
         <div class="vehicles-grid" id="dashboardVehiclesGrid">
 
-          <div class="vehicle-card" data-plate="RJ14 AB 4587" data-city="Jaipur Route" data-status="Healthy">
-            <span class="badge online">Online</span>
+          <div class="vehicle-card" id="liveVehicleCard" data-plate="RJ14 AB 4587" data-city="Jaipur Route" data-status="Healthy">
+            <span class="badge online" id="liveVehicleBadge">Online</span>
             <img class="vehicle-img" src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=500&auto=format&fit=crop&q=60" alt="Truck RJ14 AB 4587">
             <div class="vehicle-body">
-              <div class="vehicle-plate">RJ14 AB 4587</div>
-              <div class="vehicle-route">Jaipur Route</div>
+              <div class="vehicle-plate" id="liveVehiclePlate">RJ14 AB 4587</div>
+              <div class="vehicle-route" id="liveVehicleRoute">Jaipur Route</div>
               <div class="vehicle-metrics">
-                <div class="metric temp"><span class="val">22.1°c</span><span class="lbl">Temperature</span></div>
-                <div class="metric"><span class="val">54%</span><span class="lbl">Humidity</span></div>
-                <span class="status-pill healthy">Healthy</span>
+                <div class="metric temp"><span class="val" id="liveVehicleTemp">-- °C</span><span class="lbl">Temperature</span></div>
+                <div class="metric"><span class="val" id="liveVehicleHumidity">-- %</span><span class="lbl">Humidity</span></div>
+                <span class="status-pill healthy" id="liveVehicleStatus">Healthy</span>
               </div>
             </div>
           </div>
-
-          <div class="vehicle-card" data-plate="DL1L AB 1234" data-city="Delhi Route" data-status="Warning">
-            <span class="badge warning">Warning</span>
-            <img class="vehicle-img" src="https://images.unsplash.com/photo-1592805723216-27b7dcc65fbd?w=500&auto=format&fit=crop&q=60" alt="Truck DL1L AB 1234">
-            <div class="vehicle-body">
-              <div class="vehicle-plate">DL1L AB 1234</div>
-              <div class="vehicle-route">Delhi Route</div>
-              <div class="vehicle-metrics">
-                <div class="metric temp2"><span class="val">26.8°c</span><span class="lbl">Temperature</span></div>
-                <div class="metric"><span class="val">60%</span><span class="lbl">Humidity</span></div>
-                <span class="status-pill warning">Warning</span>
-              </div>
-            </div>
-          </div>
-          <!-- 🔌 INTEGRATION POINT: render one .vehicle-card per row returned by getVehicles() in assets/js/mockData.js -->
+          <!-- Live values filled by loadDashboardData() from /api/latest -->
 
         </div>
         <div class="no-results" id="dashboardNoResults" style="display:none;">No vehicles match your search.</div>
