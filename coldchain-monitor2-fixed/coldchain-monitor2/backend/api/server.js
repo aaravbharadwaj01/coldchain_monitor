@@ -52,7 +52,101 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: "8h" });
-    res.json({ token, user: { name: user.name, email: user.email, role: user.role } });
+    res.json({
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, phone: user.phone }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Look up security question by email (forgot-password step 1)
+app.post("/api/auth/security-question", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const [rows] = await pool.query(
+      "SELECT id, security_question FROM users WHERE email = ?",
+      [email.trim().toLowerCase()]
+    );
+    const user = rows[0];
+    if (!user || !user.security_question) {
+      return res.status(404).json({ error: "No account found for this email, or security question not set." });
+    }
+    res.json({ userId: user.id, securityQuestion: user.security_question });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Verify security answer (forgot-password step 2). On success returns a short-lived reset token.
+app.post("/api/auth/verify-security-answer", async (req, res) => {
+  try {
+    const { email, answer } = req.body;
+    if (!email || !answer) {
+      return res.status(400).json({ error: "Email and answer are required" });
+    }
+
+    const [rows] = await pool.query(
+      "SELECT id, security_answer, name, email, role FROM users WHERE email = ?",
+      [email.trim().toLowerCase()]
+    );
+    const user = rows[0];
+    if (!user) {
+      return res.status(404).json({ error: "No account found for this email." });
+    }
+
+    const stored = (user.security_answer || "").trim().toLowerCase();
+    const given = String(answer).trim().toLowerCase();
+    if (!stored || stored !== given) {
+      return res.status(401).json({ error: "Incorrect security answer." });
+    }
+
+    const resetToken = jwt.sign(
+      { id: user.id, purpose: "password-reset" },
+      JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.json({
+      ok: true,
+      resetToken,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reset password after successful security-question verification
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+    if (!resetToken || !newPassword) {
+      return res.status(400).json({ error: "resetToken and newPassword are required" });
+    }
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(resetToken, JWT_SECRET);
+    } catch (_) {
+      return res.status(401).json({ error: "Reset session expired. Please try again." });
+    }
+    if (payload.purpose !== "password-reset") {
+      return res.status(401).json({ error: "Invalid reset token" });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await pool.query("UPDATE users SET password_hash = ? WHERE id = ?", [newHash, payload.id]);
+    res.json({ ok: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -546,13 +640,28 @@ app.put("/api/profile", async (req, res) => {
 
 app.post("/api/profile/change-password", async (req, res) => {
   try {
-    const { userId, currentPassword, newPassword } = req.body;
-    const [[user]] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
+    const { userId, email, currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current and new password are required" });
+    }
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    }
+
+    let user;
+    if (userId) {
+      const [[row]] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
+      user = row;
+    } else if (email) {
+      const [[row]] = await pool.query("SELECT * FROM users WHERE email = ?", [email.trim().toLowerCase()]);
+      user = row;
+    }
+
     if (!user || !(await bcrypt.compare(currentPassword, user.password_hash))) {
       return res.status(401).json({ error: "Current password incorrect" });
     }
     const newHash = await bcrypt.hash(newPassword, 10);
-    await pool.query("UPDATE users SET password_hash = ? WHERE id = ?", [newHash, userId]);
+    await pool.query("UPDATE users SET password_hash = ? WHERE id = ?", [newHash, user.id]);
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
