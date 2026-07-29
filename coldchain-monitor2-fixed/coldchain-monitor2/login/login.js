@@ -135,10 +135,7 @@ loginForm.addEventListener("submit", function(e){
 // =====================================================================
 document.getElementById("forgotPassword").addEventListener("click",(e)=>{
     e.preventDefault();
-    // 🔌 INTEGRATION POINT: POST /api/auth/forgot-password { email } ->
-    // backend generates a reset token, stores it in SQL `password_resets`
-    // table, and emails a reset link to the user.
-    alert("Please contact your administrator to reset the password.");
+    window.location.href = "forgot-password.html";
 });
 
 // =====================================================================
