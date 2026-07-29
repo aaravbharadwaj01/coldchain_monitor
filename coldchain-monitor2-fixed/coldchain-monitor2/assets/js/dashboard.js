@@ -267,6 +267,135 @@ function updateTimeoutDisplays(){
 })();
 
 // =====================================================================
+// SETTINGS PAGE — General / Alerts / Email-SMS tabs
+// 🔌 INTEGRATION POINT: swap localStorage for GET/PUT /api/settings/general,
+// /api/settings/alerts, /api/settings/notifications once the backend +
+// `app_settings` SQL table are live. Update Interval is intentionally
+// fixed at 60s (see UPDATE_INTERVAL_SEC below) and is not user-editable.
+// =====================================================================
+const GENERAL_SETTINGS_KEY = "coldchain_generalSettings";
+const ALERT_SETTINGS_KEY = "coldchain_alertSettings";
+const EMAILSMS_SETTINGS_KEY = "coldchain_emailSmsSettings";
+const UPDATE_INTERVAL_SEC = 60;
+
+function getGeneralSettings(){
+  try{
+    const raw = localStorage.getItem(GENERAL_SETTINGS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ /* fall through to defaults */ }
+  return { companyName: "", updateIntervalSec: UPDATE_INTERVAL_SEC, timezone: "(UTC +05:30) Asia/Kolkata" };
+}
+function saveGeneralSettings(s){
+  localStorage.setItem(GENERAL_SETTINGS_KEY, JSON.stringify(s));
+}
+
+function getAlertSettings(){
+  try{
+    const raw = localStorage.getItem(ALERT_SETTINGS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ /* fall through to defaults */ }
+  return { tempBreach: "Enabled", humidityBreach: "Enabled", sensorOffline: "Enabled", doorOpen: "Enabled" };
+}
+function saveAlertSettings(s){
+  localStorage.setItem(ALERT_SETTINGS_KEY, JSON.stringify(s));
+}
+
+function getEmailSmsSettings(){
+  try{
+    const raw = localStorage.getItem(EMAILSMS_SETTINGS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ /* fall through to defaults */ }
+  return { notificationEmail: "", notificationPhone: "" };
+}
+function saveEmailSmsSettings(s){
+  localStorage.setItem(EMAILSMS_SETTINGS_KEY, JSON.stringify(s));
+}
+
+function flashSavedMsg(el){
+  if(!el) return;
+  el.style.display = "inline";
+  setTimeout(()=> el.style.display = "none", 2500);
+}
+
+(function initGeneralSettingsPage(){
+  const form = document.getElementById("generalSettingsForm");
+  if(!form) return;
+
+  const companyInput = document.getElementById("companyNameInput");
+  const intervalInput = document.getElementById("updateIntervalInput");
+  const timezoneInput = document.getElementById("timezoneInput");
+  const savedMsg = document.getElementById("generalSavedMsg");
+
+  const current = getGeneralSettings();
+  if(companyInput) companyInput.value = current.companyName || "";
+  if(intervalInput) intervalInput.value = UPDATE_INTERVAL_SEC; // always fixed at 60s
+  if(timezoneInput && current.timezone) timezoneInput.value = current.timezone;
+
+  form.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const data = {
+      companyName: companyInput ? companyInput.value : "",
+      updateIntervalSec: UPDATE_INTERVAL_SEC, // fixed, never taken from the (disabled) input
+      timezone: timezoneInput ? timezoneInput.value : ""
+    };
+    saveGeneralSettings(data);
+    flashSavedMsg(savedMsg);
+  });
+})();
+
+(function initAlertsSettingsPage(){
+  const form = document.getElementById("alertsSettingsForm");
+  if(!form) return;
+
+  const tempSel = document.getElementById("notifyTempBreach");
+  const humSel = document.getElementById("notifyHumidityBreach");
+  const offlineSel = document.getElementById("notifySensorOffline");
+  const doorSel = document.getElementById("notifyDoorOpen");
+  const savedMsg = document.getElementById("alertsSavedMsg");
+
+  const current = getAlertSettings();
+  if(tempSel) tempSel.value = current.tempBreach;
+  if(humSel) humSel.value = current.humidityBreach;
+  if(offlineSel) offlineSel.value = current.sensorOffline;
+  if(doorSel) doorSel.value = current.doorOpen;
+
+  form.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const data = {
+      tempBreach: tempSel ? tempSel.value : "Enabled",
+      humidityBreach: humSel ? humSel.value : "Enabled",
+      sensorOffline: offlineSel ? offlineSel.value : "Enabled",
+      doorOpen: doorSel ? doorSel.value : "Enabled"
+    };
+    saveAlertSettings(data);
+    flashSavedMsg(savedMsg);
+  });
+})();
+
+(function initEmailSmsSettingsPage(){
+  const form = document.getElementById("emailSmsSettingsForm");
+  if(!form) return;
+
+  const emailInput = document.getElementById("notificationEmailInput");
+  const phoneInput = document.getElementById("notificationPhoneInput");
+  const savedMsg = document.getElementById("emailSmsSavedMsg");
+
+  const current = getEmailSmsSettings();
+  if(emailInput) emailInput.value = current.notificationEmail || "";
+  if(phoneInput) phoneInput.value = current.notificationPhone || "";
+
+  form.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const data = {
+      notificationEmail: emailInput ? emailInput.value : "",
+      notificationPhone: phoneInput ? phoneInput.value : ""
+    };
+    saveEmailSmsSettings(data);
+    flashSavedMsg(savedMsg);
+  });
+})();
+
+// =====================================================================
 // DASHBOARD PAGE — working "Search Vehicle / City" + status filter
 // =====================================================================
 (function initDashboardSearch(){
