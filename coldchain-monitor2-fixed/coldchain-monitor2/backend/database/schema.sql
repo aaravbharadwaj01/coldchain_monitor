@@ -14,15 +14,23 @@ USE coldchain_monitor;
 -- USERS  (login / profile pages)
 -- ---------------------------------------------------------------------
 CREATE TABLE users (
-  id            INT AUTO_INCREMENT PRIMARY KEY,
-  name          VARCHAR(120) NOT NULL,
-  email         VARCHAR(160) NOT NULL UNIQUE,
-  phone         VARCHAR(30),
-  password_hash VARCHAR(255) NOT NULL,      -- bcrypt hash, never plain text
-  role          ENUM('Administrator','Manager','Viewer') DEFAULT 'Viewer',
-  photo_url     VARCHAR(255),
-  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id                INT AUTO_INCREMENT PRIMARY KEY,
+  name              VARCHAR(120) NOT NULL,
+  email             VARCHAR(160) NOT NULL UNIQUE,
+  phone             VARCHAR(30),
+  password_hash     VARCHAR(255) NOT NULL,      -- bcrypt hash, never plain text
+  role              ENUM('Administrator','Manager','Viewer') DEFAULT 'Viewer',
+  photo_url         VARCHAR(255),
+  security_question VARCHAR(255),               -- used by forgot-password flow
+  security_answer   VARCHAR(255),               -- stored lowercased for case-insensitive match
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Example admin user (password: admin123). Re-hash if you change the seed password.
+-- INSERT INTO users (name, email, phone, password_hash, role, security_question, security_answer)
+-- VALUES ('Admin User', 'admin@coldchainmonitor.com', '+91 98765 43210',
+--   '$2b$10$PLACEHOLDER_BCRYPT_HASH', 'Administrator',
+--   'What is the name of your first pet?', 'buddy');
 
 -- ---------------------------------------------------------------------
 -- VEHICLES  (vehicles page, dashboard vehicle cards)
@@ -119,7 +127,6 @@ CREATE TABLE app_settings (
   company_name        VARCHAR(160),
   update_interval_sec INT DEFAULT 60,
   timezone            VARCHAR(60) DEFAULT '(UTC +05:30) Asia/Kolkata',
-  theme               ENUM('Light','Dark') DEFAULT 'Light',
   notify_email        VARCHAR(160),
   notify_phone        VARCHAR(30)
 );
