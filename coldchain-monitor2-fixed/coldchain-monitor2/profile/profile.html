@@ -112,24 +112,21 @@
           <div class="form-grid">
             <div class="field">
               <label>Current Password</label>
-              <input type="password" placeholder="Enter current password">
+              <input type="password" id="currentPassword" placeholder="Enter current password" required>
             </div>
             <div class="field"></div>
             <div class="field">
               <label>New Password</label>
-              <input type="password" placeholder="Enter new password">
+              <input type="password" id="newPassword" placeholder="Enter new password" required minlength="6">
             </div>
             <div class="field">
               <label>Confirm New Password</label>
-              <input type="password" placeholder="Re-enter new password">
+              <input type="password" id="confirmPassword" placeholder="Re-enter new password" required minlength="6">
             </div>
           </div>
-          <button type="submit" class="btn-primary" style="margin-top:26px;">Update Password</button>
+          <button type="submit" class="btn-primary" id="updatePasswordBtn" style="margin-top:26px;">Update Password</button>
+          <p id="passwordMessage" style="margin-top:14px;font-size:14px;font-weight:600;"></p>
         </form>
-        <!-- 🔌 INTEGRATION POINT: on submit, POST /api/profile/change-password
-             -> backend verifies current password against the bcrypt hash
-             stored in SQL `users`.password_hash, then UPDATEs it with the
-             new bcrypt hash. -->
       </div>
 
     </div>
@@ -139,5 +136,66 @@
 
 <script src="../assets/js/mockData.js"></script>
 <script src="../assets/js/dashboard.js"></script>
+<script>
+(function(){
+  const API_BASE = "https://coldchain-monitor.onrender.com";
+  const form = document.getElementById("changePasswordForm");
+  if(!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const msg = document.getElementById("passwordMessage");
+    const btn = document.getElementById("updatePasswordBtn");
+
+    msg.textContent = "";
+    msg.style.color = "";
+
+    if (newPassword !== confirmPassword) {
+      msg.style.color = "#e33d3d";
+      msg.textContent = "New passwords do not match.";
+      return;
+    }
+    if (newPassword.length < 6) {
+      msg.style.color = "#e33d3d";
+      msg.textContent = "New password must be at least 6 characters.";
+      return;
+    }
+
+    const userId = localStorage.getItem("loggedInUserId");
+    const email = localStorage.getItem("loggedInUser");
+
+    btn.disabled = true;
+    btn.textContent = "Updating…";
+
+    try {
+      const res = await fetch(`${API_BASE}/api/profile/change-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userId ? Number(userId) : undefined,
+          email: email || undefined,
+          currentPassword,
+          newPassword
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not update password");
+
+      msg.style.color = "#16a34a";
+      msg.textContent = "Password updated successfully in the database.";
+      form.reset();
+    } catch (err) {
+      msg.style.color = "#e33d3d";
+      msg.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Update Password";
+    }
+  });
+})();
+</script>
 </body>
 </html>
