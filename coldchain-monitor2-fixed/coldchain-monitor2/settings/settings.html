@@ -78,80 +78,87 @@
           <div class="form-grid">
             <div class="field">
               <label>Company Name</label>
-              <input type="text" value="Enter vehicle Pvt. Ltd." placeholder="Enter vehicle Pvt. Ltd.">
+              <input type="text" id="companyNameInput" placeholder="Enter vehicle Pvt. Ltd.">
             </div>
             <div class="field">
               <label>Update Interval (seconds)</label>
-              <input type="number" value="60">
+              <input type="number" id="updateIntervalInput" value="60" disabled>
             </div>
             <div class="field">
               <label>Timezone</label>
-              <select>
+              <select id="timezoneInput">
                 <option>(UTC +05:30) Asia/Kolkata</option>
                 <option>(UTC +00:00) UTC</option>
               </select>
             </div>
-            <div class="field">
-              <label>Theme</label>
-              <select>
-                <option>Light</option>
-                <option>Dark</option>
-              </select>
-            </div>
           </div>
           <button type="submit" class="btn-primary" style="margin-top:26px;">Save Changes</button>
+          <span id="generalSavedMsg" style="display:none;color:var(--green);font-weight:600;font-size:13.5px;margin-left:14px;">✓ Saved</span>
         </form>
         <!-- 🔌 INTEGRATION POINT: on submit, PUT /api/settings/general with
              this form's values -> UPDATE SQL `app_settings` table. The
-             "Update Interval" value here is also what should be sent down
-             to each ESP32 device (e.g. via an MQTT config topic or a
+             "Update Interval" is fixed at 60s (field is disabled, value is
+             hardcoded to 60 below) and is what should be sent down to each
+             ESP32 device (e.g. via an MQTT config topic or a
              GET /api/settings/interval poll on boot) so it knows how often
-             to sample + POST sensor readings. -->
+             to sample + POST sensor readings. Until the backend is live,
+             values are persisted to localStorage and reloaded on page
+             load so they survive a refresh. -->
       </div>
 
       <!-- ALERTS -->
       <div class="tab-panel" id="tab-alerts" data-group="settings">
-        <div class="form-grid">
-          <div class="field">
-            <label>Notify on Temperature Threshold Breach</label>
-            <select><option>Enabled</option><option>Disabled</option></select>
+        <form id="alertsSettingsForm">
+          <div class="form-grid">
+            <div class="field">
+              <label>Notify on Temperature Threshold Breach</label>
+              <select id="notifyTempBreach"><option>Enabled</option><option>Disabled</option></select>
+            </div>
+            <div class="field">
+              <label>Notify on Humidity Threshold Breach</label>
+              <select id="notifyHumidityBreach"><option>Enabled</option><option>Disabled</option></select>
+            </div>
+            <div class="field">
+              <label>Notify on Sensor Offline</label>
+              <select id="notifySensorOffline"><option>Enabled</option><option>Disabled</option></select>
+            </div>
+            <div class="field">
+              <label>Notify on Door Open</label>
+              <select id="notifyDoorOpen"><option>Enabled</option><option>Disabled</option></select>
+            </div>
           </div>
-          <div class="field">
-            <label>Notify on Humidity Threshold Breach</label>
-            <select><option>Enabled</option><option>Disabled</option></select>
-          </div>
-          <div class="field">
-            <label>Notify on Sensor Offline</label>
-            <select><option>Enabled</option><option>Disabled</option></select>
-          </div>
-          <div class="field">
-            <label>Notify on Door Open</label>
-            <select><option>Enabled</option><option>Disabled</option></select>
-          </div>
-        </div>
-        <button class="btn-primary" style="margin-top:26px;">Save Changes</button>
+          <button type="submit" class="btn-primary" style="margin-top:26px;">Save Changes</button>
+          <span id="alertsSavedMsg" style="display:none;color:var(--green);font-weight:600;font-size:13.5px;margin-left:14px;">✓ Saved</span>
+        </form>
         <!-- 🔌 INTEGRATION POINT: PUT /api/settings/alerts -> UPDATE `app_settings`.
              Backend alert-evaluation job reads these flags each time a new
              sensor_readings row is INSERTed by the ESP32, before deciding
-             whether to INSERT a row into `alerts`. -->
+             whether to INSERT a row into `alerts`. Until the backend is
+             live, values are persisted to localStorage and reloaded on
+             page load so they survive a refresh. -->
       </div>
 
       <!-- EMAIL / SMS -->
       <div class="tab-panel" id="tab-emailsms" data-group="settings">
-        <div class="form-grid">
-          <div class="field">
-            <label>Notification Email</label>
-            <input type="email" placeholder="admin@coldchain.com">
+        <form id="emailSmsSettingsForm">
+          <div class="form-grid">
+            <div class="field">
+              <label>Notification Email</label>
+              <input type="email" id="notificationEmailInput" placeholder="admin@coldchain.com">
+            </div>
+            <div class="field">
+              <label>Notification Phone (SMS)</label>
+              <input type="text" id="notificationPhoneInput" placeholder="+91 98765 43210">
+            </div>
           </div>
-          <div class="field">
-            <label>Notification Phone (SMS)</label>
-            <input type="text" placeholder="+91 98765 43210">
-          </div>
-        </div>
-        <button class="btn-primary" style="margin-top:26px;">Save Changes</button>
+          <button type="submit" class="btn-primary" style="margin-top:26px;">Save Changes</button>
+          <span id="emailSmsSavedMsg" style="display:none;color:var(--green);font-weight:600;font-size:13.5px;margin-left:14px;">✓ Saved</span>
+        </form>
         <!-- 🔌 INTEGRATION POINT: PUT /api/settings/notifications -> UPDATE
              `app_settings`. Backend uses these values with an email/SMS
-             provider (SMTP / Twilio) when an `alerts` row is inserted. -->
+             provider (SMTP / Twilio) when an `alerts` row is inserted.
+             Until the backend is live, values are persisted to localStorage
+             and reloaded on page load so they survive a refresh. -->
       </div>
 
       <!-- THRESHOLDS -->
