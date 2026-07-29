@@ -493,15 +493,14 @@ app.get("/api/settings/general", async (req, res) => {
 
 app.put("/api/settings/general", async (req, res) => {
   try {
-    const { companyName, updateIntervalSec, timezone, theme } = req.body;
+    const { companyName, timezone } = req.body;
     await pool.query(
       `UPDATE app_settings
        SET company_name = ?,
-           update_interval_sec = ?,
-           timezone = ?,
-           theme = ?
+           update_interval_sec = 60,
+           timezone = ?
        WHERE id = 1`,
-      [companyName, updateIntervalSec, timezone, theme]
+      [companyName, timezone]
     );
     res.json({ ok: true });
   } catch (err) {
